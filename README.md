@@ -1,16 +1,42 @@
-# cvmfs_extension
+# CVMFS JupyterLab Extension
 
-[![Github Actions Status](https://github.com/jainoshika/cvmfs-extension/workflows/Build/badge.svg)](https://github.com/jainoshika/cvmfs-extension/actions/workflows/build.yml)
+A JupyterLab extension for discovering and using software distributed through CVMFS using the Lmod module system.
 
-A JupyterLab extension.
+## Features
 
-This extension is composed of a Python package named `cvmfs_extension`
-for the server extension and a NPM package named `cvmfs_extension`
-for the frontend extension.
+- Browse software available on CVMFS directly from a JupyterLab sidebar.
+- Discover software using Lmod Spider.
+- Automatically detect the host platform using `archspec` and `/etc/os-release`.
+- Generate Lmod modulefiles for LCG releases from `setup.sh` scripts.
+- Organize LCG modules in a platform-first module tree.
+- Activate software environments through Lmod.
+- Create Jupyter kernels with the selected software environment.
+- Support manual platform selection and platform-aware software discovery.
+- Support both generated LCG modules and existing Lmod module trees (e.g. EESSI).
 
-## Requirements
+## Development Environment
 
-- JupyterLab >= 4.0.0
+| Component | Version |
+|----------|---------|
+| Python | 3.11 |
+| JupyterLab | 4.6.1 |
+| Node.js | 22.20.0 |
+| jlpm | 3.5.0 |
+| Lmod | 9.x |
+| EESSI | 2023.06 |
+| Operating System | RHEL 9 (EL9) |
+
+## Technologies
+
+- Python
+- TypeScript
+- React
+- JupyterLab Extension API
+- Lmod
+- Spider
+- CVMFS
+- archspec
+- Lua
 
 ## Install
 
@@ -47,41 +73,3 @@ jupyter labextension list
 ## Contributing
 
 If you would like to contribute to this extension, please refer to the [Contributing Guide](CONTRIBUTING.md).
-
-## AI Coding Assistant Support
-
-This project includes an `AGENTS.md` file with coding standards and best practices for JupyterLab extension development. The file follows the [AGENTS.md standard](https://agents.md) for cross-tool compatibility.
-
-### Compatible AI Tools
-
-`AGENTS.md` works with AI coding assistants that support the standard, including Cursor, GitHub Copilot, Windsurf, Aider, and others. For a current list of compatible tools, see [the AGENTS.md standard](https://agents.md).
-This project also includes symlinks for tool-specific compatibility:
-
-- `CLAUDE.md` → `AGENTS.md` (for Claude Code)
-
-- `GEMINI.md` → `AGENTS.md` (for Gemini Code Assist)
-
-Other conventions you might encounter:
-
-- `.cursorrules` - Cursor's YAML/JSON format (Cursor also supports AGENTS.md natively)
-- `CONVENTIONS.md` / `CONTRIBUTING.md` - For CodeConventions.ai and GitHub bots
-- Project-specific rules in JetBrains AI Assistant settings
-
-All tool-specific files should be symlinks to `AGENTS.md` as the single source of truth.
-
-### What's Included
-
-The `AGENTS.md` file provides guidance on:
-
-- Code quality rules and file-scoped validation commands
-- Naming conventions for packages, plugins, and files
-- Coding standards (TypeScript, Python)
-- Development workflow and debugging
-- Backend-frontend integration patterns (`APIHandler`, `requestAPI()`, routing)
-- Common pitfalls and how to avoid them
-
-### Customization
-
-You can edit `AGENTS.md` to add project-specific conventions or adjust guidelines to match your team's practices. The file uses plain Markdown with Do/Don't patterns and references to actual project files.
-
-**Note**: `AGENTS.md` is living documentation. Update it when you change conventions, add dependencies, or discover new patterns. Include `AGENTS.md` updates in commits that modify workflows or coding standards.
