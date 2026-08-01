@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "cvmfs_extension",
+  "description": "cvmfs_extension settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

@@ -1,0 +1,73 @@
+@import url('base.css');
+
+.cvmfs-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px;
+}
+
+.cvmfs-container h2 {
+  margin-bottom: 12px;
+}
+
+.search-box {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  margin-bottom: 12px;
+}
+
+.software-list {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.software-item {
+  padding: 10px;
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.software-item:last-child {
+  margin-bottom: 0;
+}
+
+.software-item:hover {
+  background: var(--jp-layout-color2);
+}
+
+.software-item strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.software-item a {
+  display: inline-block;
+  margin-top: 6px;
+}
+
+.software-card {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.software-header {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.software-details {
+  padding: 10px 16px;
+}

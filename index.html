@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CVMFS catalog test</title>
+<style>
+  body { font-family: sans-serif; max-width: 480px; margin: 40px auto; }
+  .package { border-bottom: 1px solid #ddd; padding: 8px 0; }
+  .version { margin-left: 16px; font-size: 14px; color: #555; }
+  button { margin-left: 8px; }
+</style>
+</head>
+<body>
+<h3>Module catalog (from spider)</h3>
+<div id="catalog">Loading...</div>
+
+<script>
+async function loadCatalog() {
+  const el = document.getElementById("catalog");
+  try {
+    const res = await fetch("http://localhost:8000/catalog");
+    const data = await res.json();
+    if (data.error) {
+      el.textContent = "Error: " + data.error;
+      return;
+    }
+    el.innerHTML = "";
+    data.forEach(pkg => {
+      const pkgDiv = document.createElement("div");
+      pkgDiv.className = "package";
+      pkgDiv.innerHTML = `<strong>${pkg.package}</strong> - ${pkg.description || ""}`;
+      (pkg.versions || []).forEach(v => {
+        const vDiv = document.createElement("div");
+        vDiv.className = "version";
+        vDiv.innerHTML = `${v.full} <button onclick="alert('would module load ${v.full}')">Load</button>`;
+        pkgDiv.appendChild(vDiv);
+      });
+      el.appendChild(pkgDiv);
+    });
+  } catch (e) {
+    el.textContent = "Could not reach backend: " + e;
+  }
+}
+loadCatalog();
+</script>
+</body>
+</html>

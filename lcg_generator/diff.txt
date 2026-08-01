@@ -1,0 +1,160 @@
+--- before.env	2026-07-11 09:50:58.000000001 +0200
++++ after.env	2026-07-11 09:51:39.000000001 +0200
+@@ -5,6 +5,7 @@
+ }
+ }
+ }
++ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/aclocal
+ BASH_FUNC_ml%%=() {  module ml "$@"
+ BASH_FUNC_module%%=() {  local _mlredir=1;
+ BASH_FUNC__module_raw%%=() {  eval "$(/usr/bin/tclsh '/usr/share/Modules/libexec/modulecmd.tcl' bash "$@")";
+@@ -12,10 +13,19 @@
+ BASH_FUNC_which%%=() {  ( alias;
+  case " $@ " in 
+ CASTOR_HOME=/castor/cern.ch/user/o/ojain
++CC=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/bin/gcc
++C_INCLUDE_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/include
++CLING_STANDARD_PCH=none
++CMAKE_CXX_STANDARD=20
++CMAKE_PREFIX_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt
+ COLUMNS=160
++COMPILER_PATH=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9
+ CONDA_SHLVL=0
++CPLUS_INCLUDE_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/include
+ CVS_RSH=ssh
++CXX=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/bin/g++
+ DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/196351/bus
++DD4hepINSTALL=/cvmfs/sft.cern.ch/lcg/releases/DD4hep/01.31-835e5/x86_64-el9-gcc13-opt
+ DEBUGINFOD_IMA_CERT_PATH=/etc/keys/ima:
+ DOCKER_HOST=unix:///run/user/196351/podman/podman.sock
+ EDITOR=/bin/nano -w
+@@ -25,15 +35,39 @@
+  esac;
+  eval ${which_declare} ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+  eval "module $@";
++FC=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/bin/gfortran
+  fi
+  fi
+  fi;
+  fi;
+  fi;
++FONTCONFIG_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/etc/fonts
++G4ABLADATA=/cvmfs/geant4.cern.ch/share/data/G4ABLA3.3
++G4CHANNELINGDATA=/cvmfs/geant4.cern.ch/share/data/G4CHANNELING1.0
++G4ENSDFSTATEDATA=/cvmfs/geant4.cern.ch/share/data/G4ENSDFSTATE3.0
++G4EXAMPLES=/cvmfs/sft.cern.ch/lcg/releases/Geant4/11.3.0-3cd7f/x86_64-el9-gcc13-opt/share/Geant4-11.3.0/examples
++G4INCLDATA=/cvmfs/geant4.cern.ch/share/data/G4INCL1.2
++G4INSTALL=/cvmfs/sft.cern.ch/lcg/releases/Geant4/11.3.0-3cd7f/x86_64-el9-gcc13-opt
++G4LEDATA=/cvmfs/geant4.cern.ch/share/data/G4EMLOW8.6.1
++G4LEVELGAMMADATA=/cvmfs/geant4.cern.ch/share/data/PhotonEvaporation6.1
++G4NEUTRONHPDATA=/cvmfs/geant4.cern.ch/share/data/G4NDL4.7.1
++G4PARTICLEXSDATA=/cvmfs/geant4.cern.ch/share/data/G4PARTICLEXS4.1
++G4PIIDATA=/cvmfs/geant4.cern.ch/share/data/G4PII1.3
++G4RADIOACTIVEDATA=/cvmfs/geant4.cern.ch/share/data/RadioactiveDecay6.1.2
++G4REALSURFACEDATA=/cvmfs/geant4.cern.ch/share/data/RealSurface2.2
++G4SAIDXSDATA=/cvmfs/geant4.cern.ch/share/data/G4SAIDDATA2.0
++GIT_EXEC_PATH=/cvmfs/sft.cern.ch/lcg/releases/git/2.29.2-daa17/x86_64-el9-gcc13-opt/libexec/git-core
++GNUPLOT_DRIVER_DIR=/cvmfs/sft.cern.ch/lcg/releases/gnuplot/5.4.6-d2aa5/x86_64-el9-gcc13-opt/libexec/gnuplot/5.4
++GOBIN=/cvmfs/sft.cern.ch/lcg/releases/gophernotes/7c3ca4e-7a411/x86_64-el9-gcc13-opt/bin
++GOPATH=/cvmfs/sft.cern.ch/lcg/releases/gophernotes/7c3ca4e-7a411/x86_64-el9-gcc13-opt:
++GOROOT=/cvmfs/sft.cern.ch/lcg/releases/go/1.12.5-ff8e6/x86_64-el9-gcc13-opt
+ GUESTFISH_INIT=\e[1;34m
+ GUESTFISH_OUTPUT=\e[0m
+ GUESTFISH_PS1=\[\e[1;32m\]><fs>\[\e[0;31m\] 
+ GUESTFISH_RESTORE=\e[0m
++GVBINDIR=/cvmfs/sft.cern.ch/lcg/releases/graphviz/8.0.5-6b806/x86_64-el9-gcc13-opt/lib/graphviz
++HADOOP_CLASSPATH=/cvmfs/sft.cern.ch/lcg/releases/hadoop_xrootd/1.0.7-ff794/x86_64-el9-gcc13-opt/lib/hadoop-xrootd.jar
++HBASE_HOME=/cvmfs/sft.cern.ch/lcg/releases/hbase/1.2.0-39e81/x86_64-el9-gcc13-opt
+ HISTCONTROL=ignoredups
+ HISTSIZE=1000
+ HOME=/afs/cern.ch/user/o/ojain
+@@ -43,18 +77,27 @@
+  if [ "$MODULES_REDIRECT_OUTPUT" = '0' ]; then
+  if [ "$MODULES_REDIRECT_OUTPUT" = '1' ]; then
+  if [ -n "${MODULES_REDIRECT_OUTPUT+x}" ]; then
++JAVA_HOME=/cvmfs/sft.cern.ch/lcg/releases/java/8u392-fe115/x86_64-el9-gcc13-opt
++JULIA_DEPOT_PATH=:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/julia
++JULIA_LOAD_PATH=:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/julia/environments/v1.11
++JULIA_PROJECT=/afs/cern.ch/user/o/ojain/.julia/environments/v1.11/
++JUPYTER_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/jupyter:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/etc/notebook
+ KDEDIRS=/usr
+ KRB5CCNAME=FILE:/run/user/196351/krb5cc
+ KUBECACHEDIR=/run/user/196351/kubecache
+ LANG=en_US.UTF-8
+ LCG_GFAL_INFOSYS=lcg-bdii.cern.ch:2170
++LCG_VERSION=107
++LCIO=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt
++LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/thepeg/2.3.0-b80a0/x86_64-el9-gcc13-opt/lib/ThePEG:/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/herwig++/7.3.0p1-af728/x86_64-el9-gcc13-opt/lib/Herwig:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/jaxlib/mlir/_mlir_libs:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/torch/lib:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/onnxruntime/capi/:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/tensorflow:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/tensorflow/contrib/tensor_forest:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/tensorflow/python/framework:/cvmfs/sft.cern.ch/lcg/releases/java/8u392-fe115/x86_64-el9-gcc13-opt/jre/lib/amd64:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib64:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib:/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/lib:/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/lib64:/cvmfs/sft.cern.ch/lcg/releases/binutils/2.40-acaab/x86_64-el9/lib:/cvmfs/sft.cern.ch/lcg/releases/R/4.3.0-06e96/x86_64-el9-gcc13-opt/lib64/R/library/readr/rcon
+ LESSOPEN=||/usr/bin/lesspipe.sh %s
++LHAPDF_DATA_PATH=/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current/:/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/lhapdf/6.5.5-4e5e6/x86_64-el9-gcc13-opt/share/LHAPDF:
+ LINES=17
+ LOADEDMODULES=
+ LOGNAME=ojain
+ LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=01;37;41:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=01;36:*.au=01;36:*.flac=01;36:*.m4a=01;36:*.mid=01;36:*.midi=01;36:*.mka=01;36:*.mp3=01;36:*.mpc=01;36:*.ogg=01;36:*.ra=01;36:*.wav=01;36:*.oga=01;36:*.opus=01;36:*.spx=01;36:*.xspf=01;36:
+ MAIL=/var/spool/mail/ojain
+-MANPATH=/usr/share/man::/opt/puppetlabs/puppet/share/man
++MANPATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/man:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/man:/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/share/man:/cvmfs/sft.cern.ch/lcg/releases/binutils/2.40-acaab/x86_64-el9/share/man:/usr/share/man::/opt/puppetlabs/puppet/share/man
+ MESA_GLSL_CACHE_DIR=/run/user/196351
+ MESA_SHADER_CACHE_DIR=/run/user/196351
+  _mlredir=0
+@@ -72,8 +115,17 @@
+ __MODULES_SHARE_MANPATH=:1
+ MOTD_SHOWN=pam
+ MYPROXY_SERVER=myproxy.cern.ch
++MYSQL_HOME=/cvmfs/sft.cern.ch/lcg/releases/mysql/10.5.20-7b487/x86_64-el9-gcc13-opt
+  *' --no-redirect '*)
++OCAMLLIB=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/ocaml
++OCTAVE_BINDIR=/cvmfs/sft.cern.ch/lcg/releases/octave/6.2.0-1af56/x86_64-el9-gcc13-opt/bin
++OCTAVE_HOME=/cvmfs/sft.cern.ch/lcg/releases/octave/6.2.0-1af56/x86_64-el9-gcc13-opt
++OCTAVE_LINK_DEPS=-lfreetype -lz -lGL -lGLU -lfontconfig -lfreetype -lX11 -lncurses -lpcre -ldl -lgfortran -lm -lquadmath -lutil -lm -L/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib  
++OCT_LINK_DEPS=-lfreetype -lz -lGL -lGLU -lfontconfig -lfreetype -lX11 -lncurses -lpcre -ldl -lgfortran -lm -lquadmath -lutil -lm -L/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib  
+ OLDPWD=/afs/cern.ch/user/o/ojain
++OL_PROCLIB_PATH=/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/openloops/2.1.3p2-8846d/x86_64-el9-gcc13-opt
++OPAL_PREFIX=/cvmfs/sft.cern.ch/lcg/releases/openmpi/4.1.6-b6c0d/x86_64-el9-gcc13-opt
++OpenLoopsPath=/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/openloops/2.1.3p2-8846d/x86_64-el9-gcc13-opt
+ OS_AUTH_TYPE=v3fedkerb
+ OS_AUTH_URL=https://keystone.cern.ch/v3
+ OS_COMPUTE_API_VERSION=2.72
+@@ -85,25 +137,41 @@
+ OS_PROTOCOL=kerberos
+ OS_REGION_NAME=cern
+ OS_VOLUME_API_VERSION=3
+-PATH=/afs/cern.ch/user/o/ojain/.local/bin:/afs/cern.ch/user/o/ojain/bin:/afs/cern.ch/user/o/ojain/scripts:/usr/sue/bin:/usr/share/Modules/bin:/usr/condabin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/puppetlabs/bin
++PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/scripts:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/bin:/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18/x86_64-el9/bin:/cvmfs/sft.cern.ch/lcg/releases/binutils/2.40-acaab/x86_64-el9/bin:/afs/cern.ch/user/o/ojain/.local/bin:/afs/cern.ch/user/o/ojain/bin:/afs/cern.ch/user/o/ojain/scripts:/usr/sue/bin:/usr/share/Modules/bin:/usr/condabin:/usr/lib64/ccache:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/puppetlabs/bin
++PKG_CONFIG_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib64/pkgconfig:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/pkgconfig
+ PWD=/afs/cern.ch/user/o/ojain/lcg_module_test
++PYSPARK_PYTHON=/cvmfs/sft.cern.ch/lcg/releases/Python/3.11.9-2924c/x86_64-el9-gcc13-opt/bin/python3
++PYTHIA8=/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/pythia8/313-ba28f/x86_64-el9-gcc13-opt
++PYTHIA8DATA=/cvmfs/sft.cern.ch/lcg/releases/MCGenerators/pythia8/313-ba28f/x86_64-el9-gcc13-opt/share/Pythia8/xmldoc
++PYTHONHOME=/cvmfs/sft.cern.ch/lcg/releases/Python/3.11.9-2924c/x86_64-el9-gcc13-opt
++PYTHONPATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages/itk:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/python:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/lib/python3.11/site-packages
++QT_PLUGIN_PATH=/cvmfs/sft.cern.ch/lcg/releases/qt5/5.15.15-4ff72/x86_64-el9-gcc13-opt/plugins
++QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb
+  *' --redirect '*)
+  return $_mlstatus
++R_HOME=/cvmfs/sft.cern.ch/lcg/releases/R/4.3.0-06e96/x86_64-el9-gcc13-opt/lib64/R
++RHOME=/cvmfs/sft.cern.ch/lcg/releases/R/4.3.0-06e96/x86_64-el9-gcc13-opt/lib64/R
++ROOT_INCLUDE_PATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/include/Geant4:/cvmfs/sft.cern.ch/lcg/releases/jsonmcpp/3.11.3-0cf2d/x86_64-el9-gcc13-opt/include:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/src/cpp:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/include:/cvmfs/sft.cern.ch/lcg/releases/Python/3.11.9-2924c/x86_64-el9-gcc13-opt/include/python3.11:/cvmfs/sft.cern.ch/lcg/releases/R/4.3.0-06e96/x86_64-el9-gcc13-opt/lib64/R/include:/cvmfs/sft.cern.ch/lcg/releases/R/4.3.0-06e96/x86_64-el9-gcc13-opt/lib64/R/library/RInside/include:/cvmfs/sft.cern.ch/lcg/releases/R/4.3.0-06e96/x86_64-el9-gcc13-opt/lib64/R/library/Rcpp/include
++ROOTSYS=/cvmfs/sft.cern.ch/lcg/releases/ROOT/6.34.02-18eb6/x86_64-el9-gcc13-opt
+ S_COLORS=auto
+ SELINUX_LEVEL_REQUESTED=
+ SELINUX_ROLE_REQUESTED=
+ SELINUX_USE_CURRENT_RANGE=
+ SHELL=/usr/bin/bash
+ SHLVL=1
++SPARK_DIST_CLASSPATH=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/etc/hadoop:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/common/lib/*:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/common/*:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/hdfs:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/hdfs/lib/*:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/hdfs/*:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/mapreduce/*:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/yarn/lib/*:/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/hadoop/yarn/*:/cvmfs/sft.cern.ch/lcg/releases/hadoop_xrootd/1.0.7-ff794/x86_64-el9-gcc13-opt/lib/hadoop-xrootd.jar
++SPARK_HOME=/cvmfs/sft.cern.ch/lcg/releases/spark/3.5.4-cc886/x86_64-el9-gcc13-opt
+ SSH_ASKPASS=/usr/libexec/openssh/gnome-ssh-askpass
+ SSH_CLIENT=46.193.2.21 53358 22
+ SSH_CONNECTION=46.193.2.21 53358 188.185.41.111 22
+ SSH_TTY=/dev/pts/146
++SWIG_LIB=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/share/swig/4.3.0
+ TERM=xterm-256color
+ TMPDIR=/tmp/ojain
+ USER=ojain
+ _=/usr/bin/env
+  /usr/bin/scl "$@";
++VALGRIND_LIB=/cvmfs/sft.cern.ch/lcg/views/LCG_107/x86_64-el9-gcc13-opt/libexec/valgrind
+ which_declare=declare -f
+ XDG_RUNTIME_DIR=/run/user/196351
+ XDG_SESSION_CLASS=user
