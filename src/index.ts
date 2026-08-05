@@ -6,14 +6,22 @@ import {
 import { requestAPI } from './request';
 import { CvmfsPanel } from './panel';
 
-interface Software {
-  package: string;
-  description: string;
-  defaultVersionName: string;
-  url: string;
+interface Repository {
+  name: string;
+  packages: any[];
+}
 
-  platforms: string[];
-  selectedPlatform: string | null;
+interface CatalogResponse {
+  platform: string;
+  repositories: Repository[];
+}
+
+interface PlatformInfo {
+  architecture: string;
+  os: string;
+  available: string[];
+  compatible: string[];
+  selected: string;
 }
 
 const plugin: JupyterFrontEndPlugin<void> = {
@@ -21,23 +29,35 @@ const plugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
 
   activate: async (app: JupyterFrontEnd) => {
-    console.log('CVMFS extension activated');
+
+    const serverSettings = app.serviceManager.serverSettings;
 
     try {
-      const data = await requestAPI<Software[]>(
-        'catalog',
-        app.serviceManager.serverSettings
+
+      const platform = await requestAPI<PlatformInfo>(
+        'platform',
+        serverSettings
       );
 
-      console.log('Catalog:', data);
+      const catalog = await requestAPI<CatalogResponse>(
+        `catalog?platform=${platform.selected}`,
+        serverSettings
+      );
 
-      const panel = new CvmfsPanel(data);
+      const panel = new CvmfsPanel({
+        repositories: catalog.repositories,
+        platform,
+        serverSettings
+      });
 
       app.shell.add(panel, 'left', {
         rank: 600
       });
+
     } catch (err) {
-      console.error('Failed to fetch catalog:', err);
+
+      console.error(err);
+
     }
   }
 };

@@ -113,7 +113,12 @@ class CatalogHandler(http.server.BaseHTTPRequestHandler):
 
             catalog = json.loads(result.stdout)
 
-            body = json.dumps(catalog).encode("utf-8")
+            response = {
+                "platform": platform,
+                "packages": catalog
+            }
+
+            body = json.dumps(response).encode("utf-8")
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")

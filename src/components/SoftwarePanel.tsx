@@ -1,90 +1,139 @@
 import * as React from 'react';
+import { ServerConnection } from '@jupyterlab/services';
 
-interface Software {
+import { requestAPI } from '../request';
+import { PlatformSelector } from './PlatformSelector';
+import { SearchBar } from './SearchBar';
+import { RepositoryCard } from './RepositoryCard';
+
+interface Version {
+  versionName: string;
+  full: string;
+  help: string;
+  path: string;
+  family?: string;
+}
+
+interface Package {
   package: string;
-  description: string;
+  versions: Version[];
   defaultVersionName: string;
-  url: string;
+  categories: string;
+}
 
-  platforms: string[];
-  selectedPlatform: string | null;
+interface Repository {
+  name: string;
+  packages: Package[];
+}
+
+interface CatalogResponse {
+  platform: string;
+  repositories: Repository[];
+}
+
+interface PlatformInfo {
+  architecture: string;
+  os: string;
+  available: string[];
+  compatible: string[];
+  selected: string;
 }
 
 interface Props {
-  software: Software[];
+  initialRepositories: Repository[];
+  initialPlatform: PlatformInfo;
+  serverSettings: ServerConnection.ISettings;
 }
 
-export function SoftwarePanel({ software }: Props) {
-  const [query, setQuery] = React.useState('');
-  const [expanded, setExpanded] = React.useState<string | null>(null);
-  const filtered = software
-    .filter(item => item.package.startsWith("LCG_"))
-    .filter(item =>
-      item.package.toLowerCase().includes(query.toLowerCase())
-  );
+export function SoftwarePanel({
+  initialRepositories,
+  initialPlatform,
+  serverSettings
+}: Props) {
+
+  const [repositories, setRepositories] =
+    React.useState(initialRepositories);
+
+  const [platform, setPlatform] =
+    React.useState(initialPlatform);
+
+  const [query, setQuery] =
+    React.useState("");
+
+  const [expandedRepository, setExpandedRepository] =
+    React.useState<string | null>(null);
+
+  const changePlatform = async (newPlatform: string) => {
+
+    const response = await requestAPI<CatalogResponse>(
+      `catalog?platform=${newPlatform}`,
+      serverSettings
+    );
+
+    setPlatform({
+      ...platform,
+      selected: newPlatform
+    });
+
+    setRepositories(response.repositories);
+
+    setExpandedRepository(null);
+  };
 
   return (
-    <div className="cvmfs-container">
+
+    <div
+      className="cvmfs-container"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        padding: "8px"
+      }}
+    >
+
       <h2>CVMFS Software Explorer</h2>
 
-      <input
-        className="search-box"
-        type="text"
-        placeholder="Search software..."
-        value={query}
-        onChange={e => setQuery(e.target.value)}
+      <PlatformSelector
+        platforms={platform.compatible}
+        selected={platform.selected}
+        onChange={changePlatform}
       />
 
-      <h3>Available Software ({filtered.length})</h3>
+      <SearchBar
+        query={query}
+        onChange={setQuery}
+      />
 
-      <div className="software-list">
-        {filtered.length === 0 ? (
-          <p>No matching software found.</p>
-        ) : (
-          filtered.map(item => (
-            <div key={item.package} className="software-card">
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          marginTop: "12px"
+        }}
+      >
 
-              <button
-                className="software-header"
-                onClick={() =>
-                  setExpanded(expanded === item.package ? null : item.package)
-                }
-              >
-                {expanded === item.package ? "▼" : "▶"} {item.package}
-              </button>
+        {repositories.map(repo => (
 
-              {expanded === item.package && (
-  <div className="software-details">
+          <RepositoryCard
+            key={repo.name}
+            repository={repo}
+            query={query}
+            expanded={expandedRepository === repo.name}
+            onToggle={() =>
+              setExpandedRepository(
+                expandedRepository === repo.name
+                  ? null
+                  : repo.name
+              )
+            }
+          />
 
-    <p>
-      <b>Selected Platform</b>
-    </p>
+        ))}
 
-    <p>{item.selectedPlatform ?? "No compatible platform found"}</p>
-
-    <p>
-      <b>Available Platforms</b>
-    </p>
-
-    <ul>
-      {item.platforms.map(platform => (
-        <li key={platform}>{platform}</li>
-      ))}
-    </ul>
-
-    <p>
-      <b>Packages</b>
-    </p>
-
-    <p>Loading...</p>
-
-  </div>
-)}
-
-            </div>
-          ))
-        )}
       </div>
+
     </div>
+
   );
 }

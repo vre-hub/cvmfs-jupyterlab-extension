@@ -2,8 +2,12 @@ import json
 import os
 import subprocess
 
-from .modules import platforms
-from .platform import choose_platform
+from .config import configured_paths
+from .platform_detector import (
+    available_platforms,
+    select_default_platform,
+)
+
 
 def get_spider_path() -> str:
     """
@@ -30,47 +34,64 @@ def get_spider_path() -> str:
     return spider_path
 
 
-def get_catalog(module_path: str | None = None):
+def get_catalog(platform: str | None = None):
     """
-    Run Lmod spider and return the JSON catalog.
+    Build a software catalog by scanning all configured
+    module trees with Lmod Spider.
     """
+
+    if platform is None:
+        platform = select_default_platform()
+
+    if platform is None:
+        raise RuntimeError("No compatible platform found.")
+
+    if platform not in available_platforms():
+        raise RuntimeError(
+            f"Unknown platform: {platform}"
+        )
 
     spider = get_spider_path()
 
-    cmd = [
-        spider,
-        "-o",
-        "jsonSoftwarePage",
-    ]
+    repositories = []
 
-    if module_path:
-        cmd.append(module_path)
-    else:
-        modulepath = os.environ.get("MODULEPATH")
-        if modulepath:
-            cmd.append(modulepath)
+    for name, module_path in configured_paths(platform).items():
 
-    print("Running:", " ".join(cmd))
+        print(f"Scanning {name}")
+        print(module_path)
 
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
+        cmd = [
+            spider,
+            "-o",
+            "jsonSoftwarePage",
+            module_path,
+        ]
 
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip())
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
-    catalog = json.loads(result.stdout)
+        if result.returncode != 0:
+            raise RuntimeError(
+                result.stderr.strip()
+            )
 
-    for pkg in catalog:
-        if not pkg["package"].startswith("LCG_"):
-            continue
+        catalog = json.loads(result.stdout)
 
-        available = platforms(pkg["package"])
+        repositories.append(
+            {
+                "name": name,
+                "packages": sorted(
+                    catalog,
+                    key=lambda pkg: pkg["package"].lower(),
+                ),
+            }
+        )
 
-        pkg["platforms"] = available
-        pkg["selectedPlatform"] = choose_platform(available)
-
-    return catalog
+    return {
+        "platform": platform,
+        "repositories": repositories,
+    }

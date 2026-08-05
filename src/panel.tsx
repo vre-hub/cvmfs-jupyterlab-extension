@@ -1,18 +1,31 @@
 import { ReactWidget } from '@jupyterlab/ui-components';
+import { ServerConnection } from '@jupyterlab/services';
 import * as React from 'react';
+
 import { SoftwarePanel } from './components/SoftwarePanel';
 
-interface Software {
-  package: string;
-  description: string;
-  defaultVersionName: string;
-  url: string;
-
-  platforms: string[];
-  selectedPlatform: string | null;
+interface PlatformInfo {
+  architecture: string;
+  os: string;
+  available: string[];
+  compatible: string[];
+  selected: string;
 }
+
+interface Repository {
+  name: string;
+  packages: any[];
+}
+
+interface Props {
+  repositories: Repository[];
+  platform: PlatformInfo;
+  serverSettings: ServerConnection.ISettings;
+}
+
 export class CvmfsPanel extends ReactWidget {
-  constructor(private software: Software[]) {
+
+  constructor(private props: Props) {
     super();
 
     this.id = 'cvmfs-panel';
@@ -22,6 +35,12 @@ export class CvmfsPanel extends ReactWidget {
   }
 
   render(): React.ReactElement {
-    return <SoftwarePanel software={this.software} />;
+    return (
+      <SoftwarePanel
+        initialRepositories={this.props.repositories}
+        initialPlatform={this.props.platform}
+        serverSettings={this.props.serverSettings}
+      />
+    );
   }
 }
