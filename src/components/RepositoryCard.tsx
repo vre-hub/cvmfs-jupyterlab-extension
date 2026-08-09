@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { PackageCard, Package } from './PackageCard';
+import { ServerConnection } from '@jupyterlab/services';
 
 interface Repository {
   name: string;
@@ -11,13 +12,15 @@ interface Props {
   query: string;
   expanded: boolean;
   onToggle: () => void;
+  serverSettings: ServerConnection.ISettings;
 }
 
 export function RepositoryCard({
   repository,
   query,
   expanded,
-  onToggle
+  onToggle,
+  serverSettings
 }: Props) {
 
   const [expandedPackage, setExpandedPackage] =
@@ -81,6 +84,7 @@ export function RepositoryCard({
                     : pkg.package
                 )
               }
+               serverSettings={serverSettings}
             />
 
           ))}

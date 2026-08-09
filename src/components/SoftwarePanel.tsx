@@ -127,6 +127,7 @@ export function SoftwarePanel({
                   : repo.name
               )
             }
+            serverSettings={serverSettings}
           />
 
         ))}

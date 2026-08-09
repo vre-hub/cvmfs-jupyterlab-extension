@@ -5,6 +5,7 @@ from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 
 from .catalog import get_catalog
+from .kernel_launcher import create_kernel
 from .platform_detector import (
     detect_host,
     available_platforms,
@@ -69,6 +70,63 @@ class PlatformRouteHandler(APIHandler):
             )
 
 
+class ActivateRouteHandler(APIHandler):
+    @tornado.web.authenticated
+    def post(self):
+        try:
+            data = self.get_json_body()
+
+            modules = data.get("modules")
+            platform = data.get("platform")
+            display_name = data.get("display_name")
+
+            if not modules:
+                self.set_status(400)
+                self.finish(
+                    json.dumps(
+                        {
+                            "status": "error",
+                            "code": "INVALID_REQUEST",
+                            "message": "At least one module is required",
+                        }
+                    )
+                )
+                return
+
+            if not platform:
+                platform = select_default_platform()
+
+            if not display_name:
+                display_name = "Python (" + ", ".join(modules) + ")"
+
+            kernel_name = create_kernel(
+                modules=modules,
+                platform=platform,
+                display_name=display_name,
+            )
+
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "ok",
+                        "kernel_name": kernel_name,
+                        "display_name": display_name,
+                    }
+                )
+            )
+
+        except Exception as exc:
+            self.set_status(500)
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code": "ACTIVATION_FAILED",
+                        "message": str(exc),
+                    }
+                )
+            )
+
 def setup_route_handlers(web_app):
 
     host_pattern = ".*$"
@@ -87,6 +145,12 @@ def setup_route_handlers(web_app):
         "platform",
     )
 
+    activate_route_pattern = url_path_join(
+        base_url,
+        "cvmfs-extension",
+        "activate",
+    )
+
     handlers = [
 
         (
@@ -97,6 +161,11 @@ def setup_route_handlers(web_app):
         (
             platform_route_pattern,
             PlatformRouteHandler,
+        ),
+
+        (
+            activate_route_pattern,
+            ActivateRouteHandler,
         ),
 
     ]

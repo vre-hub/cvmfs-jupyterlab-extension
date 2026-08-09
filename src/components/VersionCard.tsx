@@ -1,5 +1,9 @@
 import * as React from 'react';
 
+import { ServerConnection } from '@jupyterlab/services';
+
+import { requestAPI } from '../request';
+
 export interface Version {
   versionName: string;
   full: string;
@@ -12,9 +16,9 @@ interface Props {
   version: Version;
   category: string;
   isDefault: boolean;
-
   expanded: boolean;
   onToggle: () => void;
+  serverSettings: ServerConnection.ISettings;
 }
 
 export function VersionCard({
@@ -22,18 +26,43 @@ export function VersionCard({
   category,
   isDefault,
   expanded,
-  onToggle
+  onToggle,
+  serverSettings
 }: Props) {
-  return (
-    <div className="version-card">
+  const [activating, setActivating] = React.useState(false);
 
+  const handleActivate = async () => {
+    setActivating(true);
+
+    try {
+      const data = await requestAPI('activate', serverSettings, {
+        method: 'POST',
+        body: JSON.stringify({
+          modules: [version.full],
+          display_name: `Python (${version.full})`
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Kernel created:', data);
+
+    } catch (error) {
+      console.error('Failed to activate module:', error);
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  return (
+    <>
       <button
         className="version-header"
         onClick={onToggle}
       >
-        {expanded ? "▼" : "▶"}{" "}
-        {version.versionName}
-        {isDefault && " (default)"}
+        {expanded ? '▼' : '▶'} {version.versionName}
+        {isDefault && ' (default)'}
       </button>
 
       {expanded && (
@@ -64,15 +93,14 @@ export function VersionCard({
           <p>{version.path}</p>
 
           <button
-            disabled
-            onClick={() => console.log("Activate", version.full)}
+            disabled={activating}
+            onClick={handleActivate}
           >
-            Activate
+            {activating ? 'Activating...' : 'Activate'}
           </button>
 
         </div>
       )}
-
-    </div>
+    </>
   );
 }

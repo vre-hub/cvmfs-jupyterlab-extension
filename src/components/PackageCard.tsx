@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { VersionCard, Version } from './VersionCard';
+import { ServerConnection } from '@jupyterlab/services';
 
 export interface Package {
   package: string;
@@ -12,12 +13,14 @@ interface Props {
   pkg: Package;
   expanded: boolean;
   onToggle: () => void;
+  serverSettings: ServerConnection.ISettings;
 }
 
 export function PackageCard({
   pkg,
   expanded,
-  onToggle
+  onToggle,
+  serverSettings
 }: Props) {
 
   const [expandedVersion, setExpandedVersion] =
@@ -44,21 +47,22 @@ export function PackageCard({
 
           {pkg.versions.map(version => (
             <VersionCard
-              key={version.full}
-              version={version}
-              category={pkg.categories}
-              isDefault={
-                version.versionName === pkg.defaultVersionName
-              }
-              expanded={expandedVersion === version.full}
-              onToggle={() =>
-                setExpandedVersion(
-                  expandedVersion === version.full
-                    ? null
-                    : version.full
-                )
-              }
-            />
+                key={version.full}
+                version={version}
+                category={pkg.categories}
+                isDefault={
+                  version.versionName === pkg.defaultVersionName
+                }
+                expanded={expandedVersion === version.full}
+                onToggle={() =>
+                  setExpandedVersion(
+                    expandedVersion === version.full
+                      ? null
+                      : version.full
+                  )
+                }
+                serverSettings={serverSettings}
+              />
           ))}
 
         </div>
