@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { ServerConnection } from '@jupyterlab/services';
+
+import {
+  ServerConnection,
+  KernelSpec
+} from '@jupyterlab/services';
 
 import { requestAPI } from '../request';
 import { PlatformSelector } from './PlatformSelector';
@@ -43,14 +47,15 @@ interface Props {
   initialRepositories: Repository[];
   initialPlatform: PlatformInfo;
   serverSettings: ServerConnection.ISettings;
+  kernelSpecManager: KernelSpec.IManager;
 }
 
 export function SoftwarePanel({
   initialRepositories,
   initialPlatform,
-  serverSettings
+  serverSettings,
+  kernelSpecManager
 }: Props) {
-
   const [repositories, setRepositories] =
     React.useState(initialRepositories);
 
@@ -58,13 +63,12 @@ export function SoftwarePanel({
     React.useState(initialPlatform);
 
   const [query, setQuery] =
-    React.useState("");
+    React.useState('');
 
   const [expandedRepository, setExpandedRepository] =
     React.useState<string | null>(null);
 
   const changePlatform = async (newPlatform: string) => {
-
     const response = await requestAPI<CatalogResponse>(
       `catalog?platform=${newPlatform}`,
       serverSettings
@@ -76,22 +80,19 @@ export function SoftwarePanel({
     });
 
     setRepositories(response.repositories);
-
     setExpandedRepository(null);
   };
 
   return (
-
     <div
       className="cvmfs-container"
       style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        padding: "8px"
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        padding: '8px'
       }}
     >
-
       <h2>CVMFS Software Explorer</h2>
 
       <PlatformSelector
@@ -108,18 +109,18 @@ export function SoftwarePanel({
       <div
         style={{
           flex: 1,
-          overflowY: "auto",
-          marginTop: "12px"
+          overflowY: 'auto',
+          marginTop: '12px'
         }}
       >
-
         {repositories.map(repo => (
-
           <RepositoryCard
             key={repo.name}
             repository={repo}
             query={query}
-            expanded={expandedRepository === repo.name}
+            expanded={
+              expandedRepository === repo.name
+            }
             onToggle={() =>
               setExpandedRepository(
                 expandedRepository === repo.name
@@ -128,13 +129,10 @@ export function SoftwarePanel({
               )
             }
             serverSettings={serverSettings}
+            kernelSpecManager={kernelSpecManager}
           />
-
         ))}
-
       </div>
-
     </div>
-
   );
 }

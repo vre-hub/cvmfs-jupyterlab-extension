@@ -4,6 +4,7 @@ import tornado
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 
+from .kernel_launcher import validate_kernels, remove_kernel
 from .catalog import get_catalog
 from .kernel_launcher import create_kernel
 from .platform_detector import (
@@ -13,6 +14,56 @@ from .platform_detector import (
     select_default_platform,
 )
 
+class KernelRouteHandler(APIHandler):
+    @tornado.web.authenticated
+    async def delete(self, kernel_name):
+        try:
+            remove_kernel(kernel_name)
+
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "ok",
+                        "kernel_name": kernel_name,
+                    }
+                )
+            )
+
+        except FileNotFoundError as exc:
+            self.set_status(404)
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code": "KERNEL_NOT_FOUND",
+                        "message": str(exc),
+                    }
+                )
+            )
+
+        except ValueError as exc:
+            self.set_status(400)
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code": "INVALID_KERNEL",
+                        "message": str(exc),
+                    }
+                )
+            )
+
+        except Exception as exc:
+            self.set_status(500)
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code": "REMOVE_FAILED",
+                        "message": str(exc),
+                    }
+                )
+            )
 
 class CatalogRouteHandler(APIHandler):
     @tornado.web.authenticated
@@ -116,6 +167,8 @@ class ActivateRouteHandler(APIHandler):
             )
 
         except Exception as exc:
+            print("ACTIVATION FAILED:", repr(exc), flush=True)
+
             self.set_status(500)
             self.finish(
                 json.dumps(
@@ -151,6 +204,19 @@ def setup_route_handlers(web_app):
         "activate",
     )
 
+    kernels_route_pattern = url_path_join(
+        base_url,
+        "cvmfs-extension",
+        "kernels",
+    )
+
+    kernel_route_pattern = url_path_join(
+        base_url,
+        "cvmfs-extension",
+        "kernels",
+        "([^/]+)",
+    )
+
     handlers = [
 
         (
@@ -168,6 +234,40 @@ def setup_route_handlers(web_app):
             ActivateRouteHandler,
         ),
 
+        (
+            kernels_route_pattern,
+            KernelsRouteHandler,
+        ),
+
+        (
+            kernel_route_pattern,
+            KernelRouteHandler,
+        ),
     ]
 
     web_app.add_handlers(host_pattern, handlers)
+
+class KernelsRouteHandler(APIHandler):
+    @tornado.web.authenticated
+    def get(self):
+        try:
+            kernels = validate_kernels()
+
+            self.finish(
+                json.dumps(
+                    {
+                        "kernels": kernels
+                    }
+                )
+            )
+
+        except Exception as exc:
+            self.set_status(500)
+
+            self.finish(
+                json.dumps(
+                    {
+                        "error": str(exc)
+                    }
+                )
+            )

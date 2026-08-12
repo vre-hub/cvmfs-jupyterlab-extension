@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { PackageCard, Package } from './PackageCard';
 import { ServerConnection } from '@jupyterlab/services';
+import { KernelSpec } from '@jupyterlab/services';
 
 interface Repository {
   name: string;
@@ -13,6 +14,7 @@ interface Props {
   expanded: boolean;
   onToggle: () => void;
   serverSettings: ServerConnection.ISettings;
+  kernelSpecManager: KernelSpec.IManager;
 }
 
 export function RepositoryCard({
@@ -20,9 +22,9 @@ export function RepositoryCard({
   query,
   expanded,
   onToggle,
-  serverSettings
+  serverSettings,
+  kernelSpecManager
 }: Props) {
-
   const [expandedPackage, setExpandedPackage] =
     React.useState<string | null>(null);
 
@@ -33,10 +35,9 @@ export function RepositoryCard({
   }, [expanded]);
 
   const filteredPackages = repository.packages.filter(pkg => {
-
     const q = query.toLowerCase();
 
-    if (q === "") {
+    if (q === '') {
       return true;
     }
 
@@ -44,12 +45,12 @@ export function RepositoryCard({
       return true;
     }
 
-    return pkg.versions.some(version =>
-      version.versionName.toLowerCase().includes(q) ||
-      version.full.toLowerCase().includes(q) ||
-      version.help.toLowerCase().includes(q)
+    return pkg.versions.some(
+      version =>
+        version.versionName.toLowerCase().includes(q) ||
+        version.full.toLowerCase().includes(q) ||
+        version.help.toLowerCase().includes(q)
     );
-
   });
 
   if (filteredPackages.length === 0) {
@@ -57,22 +58,17 @@ export function RepositoryCard({
   }
 
   return (
-
     <div className="repository-card">
-
       <button
         className="repository-header"
         onClick={onToggle}
       >
-        {expanded ? "▼" : "▶"} {repository.name}
+        {expanded ? '▼' : '▶'} {repository.name}
       </button>
 
       {expanded && (
-
         <div className="repository-packages">
-
           {filteredPackages.map(pkg => (
-
             <PackageCard
               key={pkg.package}
               pkg={pkg}
@@ -84,16 +80,12 @@ export function RepositoryCard({
                     : pkg.package
                 )
               }
-               serverSettings={serverSettings}
+              serverSettings={serverSettings}
+              kernelSpecManager={kernelSpecManager}
             />
-
           ))}
-
         </div>
-
       )}
-
     </div>
-
   );
 }

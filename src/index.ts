@@ -29,35 +29,35 @@ const plugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
 
   activate: async (app: JupyterFrontEnd) => {
-
-    const serverSettings = app.serviceManager.serverSettings;
+    const serverSettings =
+      app.serviceManager.serverSettings;
 
     try {
+      const platform =
+        await requestAPI<PlatformInfo>(
+          'platform',
+          serverSettings
+        );
 
-      const platform = await requestAPI<PlatformInfo>(
-        'platform',
-        serverSettings
-      );
-
-      const catalog = await requestAPI<CatalogResponse>(
-        `catalog?platform=${platform.selected}`,
-        serverSettings
-      );
+      const catalog =
+        await requestAPI<CatalogResponse>(
+          `catalog?platform=${platform.selected}`,
+          serverSettings
+        );
 
       const panel = new CvmfsPanel({
         repositories: catalog.repositories,
         platform,
-        serverSettings
+        serverSettings,
+        kernelSpecManager:
+          app.serviceManager.kernelspecs
       });
 
       app.shell.add(panel, 'left', {
         rank: 600
       });
-
     } catch (err) {
-
       console.error(err);
-
     }
   }
 };

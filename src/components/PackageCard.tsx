@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { VersionCard, Version } from './VersionCard';
 import { ServerConnection } from '@jupyterlab/services';
+import { KernelSpec } from '@jupyterlab/services';
 
 export interface Package {
   package: string;
@@ -14,15 +15,16 @@ interface Props {
   expanded: boolean;
   onToggle: () => void;
   serverSettings: ServerConnection.ISettings;
+  kernelSpecManager: KernelSpec.IManager;
 }
 
 export function PackageCard({
   pkg,
   expanded,
   onToggle,
-  serverSettings
+  serverSettings,
+  kernelSpecManager
 }: Props) {
-
   const [expandedVersion, setExpandedVersion] =
     React.useState<string | null>(null);
 
@@ -34,40 +36,40 @@ export function PackageCard({
 
   return (
     <div className="package-card">
-
       <button
         className="package-header"
         onClick={onToggle}
       >
-        {expanded ? "▼" : "▶"} {pkg.package}
+        {expanded ? '▼' : '▶'} {pkg.package}
       </button>
 
       {expanded && (
         <div className="package-versions">
-
           {pkg.versions.map(version => (
             <VersionCard
-                key={version.full}
-                version={version}
-                category={pkg.categories}
-                isDefault={
-                  version.versionName === pkg.defaultVersionName
-                }
-                expanded={expandedVersion === version.full}
-                onToggle={() =>
-                  setExpandedVersion(
-                    expandedVersion === version.full
-                      ? null
-                      : version.full
-                  )
-                }
-                serverSettings={serverSettings}
-              />
+              key={version.full}
+              version={version}
+              category={pkg.categories}
+              isDefault={
+                version.versionName ===
+                pkg.defaultVersionName
+              }
+              expanded={
+                expandedVersion === version.full
+              }
+              onToggle={() =>
+                setExpandedVersion(
+                  expandedVersion === version.full
+                    ? null
+                    : version.full
+                )
+              }
+              serverSettings={serverSettings}
+              kernelSpecManager={kernelSpecManager}
+            />
           ))}
-
         </div>
       )}
-
     </div>
   );
 }
