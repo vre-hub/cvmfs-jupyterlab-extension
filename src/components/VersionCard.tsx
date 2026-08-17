@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import {
   KernelSpec,
   ServerConnection
@@ -39,6 +41,7 @@ interface Props {
   onToggle: () => void;
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
+  app: JupyterFrontEnd;
 }
 
 export function VersionCard({
@@ -48,7 +51,8 @@ export function VersionCard({
   expanded,
   onToggle,
   serverSettings,
-  kernelSpecManager
+  kernelSpecManager,
+  app
 }: Props) {
   const [actionLoading, setActionLoading] =
     React.useState(false);
@@ -86,6 +90,7 @@ export function VersionCard({
             'platform',
             serverSettings
           ),
+
           requestAPI<{
             kernels: KernelInfo[];
           }>(
@@ -168,14 +173,18 @@ export function VersionCard({
           serverSettings,
           {
             method: 'POST',
+
             body: JSON.stringify({
               modules: [
                 version.full
               ],
+
               platform: platform,
+
               display_name:
                 `Python (${version.full} • ${platform})`
             }),
+
             headers: {
               'Content-Type':
                 'application/json'
@@ -256,6 +265,75 @@ export function VersionCard({
     }
   };
 
+  const handleOpenTerminal = async () => {
+    if (
+      !platform ||
+      !kernelName ||
+      actionLoading
+    ) {
+      return;
+    }
+
+    try {
+      const data =
+        await requestAPI<{
+          name: string;
+          status: string;
+          modules: string[];
+          platform: string;
+        }>(
+          'terminal',
+          serverSettings,
+          {
+            method: 'POST',
+
+            body: JSON.stringify({
+              modules: [
+                version.full
+              ],
+
+              platform
+            }),
+
+            headers: {
+              'Content-Type':
+                'application/json'
+            }
+          }
+        );
+
+      console.log(
+        'Terminal created:',
+        data
+      );
+
+      /*
+       * The backend creates the terminal
+       * and returns its JupyterLab terminal
+       * name.
+       *
+       * Now ask JupyterLab to open that
+       * existing terminal.
+       */
+      await app.commands.execute(
+        'terminal:open',
+        {
+          name: data.name
+        }
+      );
+
+      console.log(
+        'Terminal opened:',
+        data.name
+      );
+    } catch (error) {
+      console.error(
+        'Failed to create/open terminal:',
+        error
+      );
+    }
+  };
+
   return (
     <>
       <button
@@ -264,7 +342,9 @@ export function VersionCard({
       >
         {expanded ? '▼' : '▶'}{' '}
         {version.versionName}
-        {isDefault && ' (default)'}
+
+        {isDefault &&
+          ' (default)'}
       </button>
 
       {expanded && (
@@ -274,13 +354,17 @@ export function VersionCard({
             <b>Category</b>
           </p>
 
-          <p>{category}</p>
+          <p>
+            {category}
+          </p>
 
           <p>
             <b>Module</b>
           </p>
 
-          <p>{version.full}</p>
+          <p>
+            {version.full}
+          </p>
 
           <p>
             <b>Platform</b>
@@ -303,13 +387,16 @@ export function VersionCard({
             <b>Modulefile</b>
           </p>
 
-          <p>{version.path}</p>
+          <p>
+            {version.path}
+          </p>
 
           <button
             disabled={
               actionLoading ||
               !platform
             }
+
             onClick={
               kernelName
                 ? handleDeactivate
@@ -326,13 +413,30 @@ export function VersionCard({
                 : 'Activate'}
           </button>
 
+          <button
+            onClick={
+              handleOpenTerminal
+            }
+
+            disabled={
+              !platform ||
+              !kernelName ||
+              actionLoading
+            }
+          >
+            Open Terminal
+          </button>
+
           {justActivated && (
             <p>
               <b>
                 Kernel ready.
               </b>{' '}
+
               Select{' '}
+
               {`Python (${version.full} • ${platform})`}{' '}
+
               from the kernel picker.
             </p>
           )}

@@ -1,5 +1,12 @@
+import {
+  JupyterFrontEnd
+} from '@jupyterlab/application';
+
 import { ReactWidget } from '@jupyterlab/ui-components';
-import { ServerConnection, KernelSpec } from '@jupyterlab/services';
+import {
+  ServerConnection,
+  KernelSpec
+} from '@jupyterlab/services';
 import * as React from 'react';
 
 import { SoftwarePanel } from './components/SoftwarePanel';
@@ -22,6 +29,7 @@ interface Props {
   platform: PlatformInfo;
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
+  app: JupyterFrontEnd;
 }
 
 export class CvmfsPanel extends ReactWidget {
@@ -37,10 +45,19 @@ export class CvmfsPanel extends ReactWidget {
   render(): React.ReactElement {
     return (
       <SoftwarePanel
-        initialRepositories={this.props.repositories}
-        initialPlatform={this.props.platform}
-        serverSettings={this.props.serverSettings}
-        kernelSpecManager={this.props.kernelSpecManager}
+        initialRepositories={
+          this.props.repositories
+        }
+        initialPlatform={
+          this.props.platform
+        }
+        serverSettings={
+          this.props.serverSettings
+        }
+        kernelSpecManager={
+          this.props.kernelSpecManager
+        }
+        app={this.props.app}
       />
     );
   }

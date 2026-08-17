@@ -13,6 +13,10 @@ from .platform_detector import (
     compatible_platforms,
     select_default_platform,
 )
+from .terminal_launcher import (
+    build_terminal_command,
+    terminal_name,
+)
 
 class KernelRouteHandler(APIHandler):
     @tornado.web.authenticated
@@ -217,6 +221,12 @@ def setup_route_handlers(web_app):
         "([^/]+)",
     )
 
+    terminal_route_pattern = url_path_join(
+        base_url,
+        "cvmfs-extension",
+        "terminal",
+    )
+
     handlers = [
 
         (
@@ -243,6 +253,10 @@ def setup_route_handlers(web_app):
             kernel_route_pattern,
             KernelRouteHandler,
         ),
+        (
+            terminal_route_pattern,
+            TerminalRouteHandler,
+        ),
     ]
 
     web_app.add_handlers(host_pattern, handlers)
@@ -268,6 +282,88 @@ class KernelsRouteHandler(APIHandler):
                 json.dumps(
                     {
                         "error": str(exc)
+                    }
+                )
+            )
+
+class TerminalRouteHandler(APIHandler):
+    @tornado.web.authenticated
+    def post(self):
+        try:
+            data = self.get_json_body()
+
+            modules = data.get("modules")
+            platform = data.get("platform")
+
+            if not modules:
+                self.set_status(400)
+                self.finish(
+                    json.dumps(
+                        {
+                            "status": "error",
+                            "code": "INVALID_REQUEST",
+                            "message": "At least one module is required",
+                        }
+                    )
+                )
+                return
+
+            if not platform:
+                self.set_status(400)
+                self.finish(
+                    json.dumps(
+                        {
+                            "status": "error",
+                            "code": "INVALID_REQUEST",
+                            "message": "Platform is required",
+                        }
+                    )
+                )
+                return
+
+            command = build_terminal_command(
+                modules=modules,
+                platform=platform,
+            )
+
+            name = terminal_name(
+                modules=modules,
+                platform=platform,
+            )
+
+            terminal_manager = (
+                self.settings["terminal_manager"]
+            )
+
+            terminal = terminal_manager.create(
+                name=name,
+                shell_command=command,
+            )
+            print("========== CVMFS TERMINAL DEBUG ==========")
+            print("manager id:", id(terminal_manager))
+            print("requested name:", repr(name))
+            print("returned terminal:", terminal)
+            print("terminal keys:", list(terminal_manager.terminals.keys()))
+            print("==========================================")
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "ok",
+                        "name": terminal["name"],
+                        "modules": modules,
+                        "platform": platform,
+                    }
+                )
+            )
+
+        except Exception as exc:
+            self.set_status(500)
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code": "TERMINAL_CREATION_FAILED",
+                        "message": str(exc),
                     }
                 )
             )

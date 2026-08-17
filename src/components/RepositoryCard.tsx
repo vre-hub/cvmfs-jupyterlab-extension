@@ -1,7 +1,10 @@
 import * as React from 'react';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import { PackageCard, Package } from './PackageCard';
-import { ServerConnection } from '@jupyterlab/services';
-import { KernelSpec } from '@jupyterlab/services';
+import {
+  ServerConnection,
+  KernelSpec
+} from '@jupyterlab/services';
 
 interface Repository {
   name: string;
@@ -15,6 +18,7 @@ interface Props {
   onToggle: () => void;
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
+  app: JupyterFrontEnd;
 }
 
 export function RepositoryCard({
@@ -23,7 +27,8 @@ export function RepositoryCard({
   expanded,
   onToggle,
   serverSettings,
-  kernelSpecManager
+  kernelSpecManager,
+  app
 }: Props) {
   const [expandedPackage, setExpandedPackage] =
     React.useState<string | null>(null);
@@ -72,7 +77,9 @@ export function RepositoryCard({
             <PackageCard
               key={pkg.package}
               pkg={pkg}
-              expanded={expandedPackage === pkg.package}
+              expanded={
+                expandedPackage === pkg.package
+              }
               onToggle={() =>
                 setExpandedPackage(
                   expandedPackage === pkg.package
@@ -82,6 +89,7 @@ export function RepositoryCard({
               }
               serverSettings={serverSettings}
               kernelSpecManager={kernelSpecManager}
+              app={app}
             />
           ))}
         </div>

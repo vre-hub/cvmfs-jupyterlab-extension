@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import {
   ServerConnection,
   KernelSpec
@@ -48,13 +50,15 @@ interface Props {
   initialPlatform: PlatformInfo;
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
+  app: JupyterFrontEnd;
 }
 
 export function SoftwarePanel({
   initialRepositories,
   initialPlatform,
   serverSettings,
-  kernelSpecManager
+  kernelSpecManager,
+  app
 }: Props) {
   const [repositories, setRepositories] =
     React.useState(initialRepositories);
@@ -130,6 +134,7 @@ export function SoftwarePanel({
             }
             serverSettings={serverSettings}
             kernelSpecManager={kernelSpecManager}
+            app={app}
           />
         ))}
       </div>

@@ -50,7 +50,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
         platform,
         serverSettings,
         kernelSpecManager:
-          app.serviceManager.kernelspecs
+          app.serviceManager.kernelspecs,
+        app
       });
 
       app.shell.add(panel, 'left', {
