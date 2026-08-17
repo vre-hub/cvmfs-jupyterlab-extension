@@ -6,6 +6,8 @@ import {
 import { requestAPI } from './request';
 import { CvmfsPanel } from './panel';
 
+import '../style/index.css';
+
 interface Repository {
   name: string;
   packages: any[];

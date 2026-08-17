@@ -3,8 +3,8 @@ import * as React from 'react';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
-  ServerConnection,
-  KernelSpec
+  KernelSpec,
+  ServerConnection
 } from '@jupyterlab/services';
 
 import { requestAPI } from '../request';
@@ -69,75 +69,188 @@ export function SoftwarePanel({
   const [query, setQuery] =
     React.useState('');
 
-  const [expandedRepository, setExpandedRepository] =
-    React.useState<string | null>(null);
+  const [
+    expandedRepository,
+    setExpandedRepository
+  ] = React.useState<string | null>(null);
 
-  const changePlatform = async (newPlatform: string) => {
-    const response = await requestAPI<CatalogResponse>(
-      `catalog?platform=${newPlatform}`,
-      serverSettings
-    );
+  const changePlatform = async (
+    newPlatform: string
+  ) => {
+    const response =
+      await requestAPI<CatalogResponse>(
+        `catalog?platform=${encodeURIComponent(
+          newPlatform
+        )}`,
+        serverSettings
+      );
 
     setPlatform({
       ...platform,
       selected: newPlatform
     });
 
-    setRepositories(response.repositories);
+    setRepositories(
+      response.repositories
+    );
+
     setExpandedRepository(null);
   };
 
   return (
-    <div
-      className="cvmfs-container"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        padding: '8px'
-      }}
-    >
-      <h2>CVMFS Software Explorer</h2>
+    <div className="cvmfs-container">
 
-      <PlatformSelector
-        platforms={platform.compatible}
-        selected={platform.selected}
-        onChange={changePlatform}
-      />
+      {/* =================================================
+          HEADER
+          ================================================= */}
+
+      <div className="cvmfs-header">
+
+        <h2>
+          CVMFS Software Explorer
+        </h2>
+
+        <p>
+          Browse and activate software
+          available through CVMFS.
+        </p>
+
+      </div>
+
+
+      {/* =================================================
+          PLATFORM INFORMATION
+          ================================================= */}
+
+      <div className="cvmfs-platform-card">
+
+        <div className="cvmfs-platform-selector-area">
+
+          <PlatformSelector
+            platforms={
+              platform.compatible
+            }
+            selected={
+              platform.selected
+            }
+            onChange={
+              changePlatform
+            }
+          />
+
+        </div>
+
+
+        <div className="cvmfs-platform-details">
+
+          <div className="cvmfs-platform-detail">
+
+            <strong>
+              Architecture
+            </strong>
+
+            <span>
+              {platform.architecture}
+            </span>
+
+          </div>
+
+
+          <div className="cvmfs-platform-detail">
+
+            <strong>
+              Operating system
+            </strong>
+
+            <span>
+              {platform.os}
+            </span>
+
+          </div>
+
+
+          <div className="cvmfs-platform-detail">
+
+            <strong>
+              Selected stack
+            </strong>
+
+            <code>
+              {platform.selected}
+            </code>
+
+          </div>
+
+        </div>
+
+
+        <div className="cvmfs-platform-explanation">
+
+          <strong>
+            About this platform
+          </strong>
+
+          <span>
+            This software stack is selected
+            based on the detected system
+            architecture and operating system.
+            It provides software built for
+            the compatible environment shown
+            above.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      {/* =================================================
+          SEARCH
+          ================================================= */}
 
       <SearchBar
         query={query}
         onChange={setQuery}
       />
 
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          marginTop: '12px'
-        }}
-      >
-        {repositories.map(repo => (
-          <RepositoryCard
-            key={repo.name}
-            repository={repo}
-            query={query}
-            expanded={
-              expandedRepository === repo.name
-            }
-            onToggle={() =>
-              setExpandedRepository(
-                expandedRepository === repo.name
-                  ? null
-                  : repo.name
-              )
-            }
-            serverSettings={serverSettings}
-            kernelSpecManager={kernelSpecManager}
-            app={app}
-          />
-        ))}
+
+      {/* =================================================
+          SOFTWARE HIERARCHY
+          ================================================= */}
+
+      <div className="cvmfs-repository-list">
+
+        {repositories.map(
+          repository => (
+            <RepositoryCard
+              key={repository.name}
+              repository={repository}
+              query={query}
+              expanded={
+                expandedRepository ===
+                repository.name
+              }
+              onToggle={() =>
+                setExpandedRepository(
+                  expandedRepository ===
+                    repository.name
+                    ? null
+                    : repository.name
+                )
+              }
+              serverSettings={
+                serverSettings
+              }
+              kernelSpecManager={
+                kernelSpecManager
+              }
+              app={app}
+            />
+          )
+        )}
+
       </div>
+
     </div>
   );
 }

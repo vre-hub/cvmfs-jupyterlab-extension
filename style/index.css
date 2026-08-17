@@ -1,73 +1,855 @@
-@import url('base.css');
+/* =========================================================
+   CVMFS SOFTWARE EXPLORER
+   ========================================================= */
 
 .cvmfs-container {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+
+  padding: 12px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.cvmfs-header {
+  margin-bottom: 14px;
+}
+
+.cvmfs-header h2 {
+  margin: 0 0 5px 0;
+
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.cvmfs-header p {
+  margin: 0;
+
+  color: var(--jp-ui-font-color2);
+
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   PLATFORM CARD
+   ========================================================= */
+
+.cvmfs-platform-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 12px;
-}
 
-.cvmfs-container h2 {
-  margin-bottom: 12px;
-}
+  gap: 10px;
 
-.search-box {
   width: 100%;
   box-sizing: border-box;
-  padding: 6px;
-  margin-bottom: 12px;
-}
 
-.software-list {
-  flex: 1;
-  overflow-y: auto;
-  border: 1px solid var(--jp-border-color2);
-  border-radius: 6px;
-  padding: 8px;
-}
-
-.software-item {
+  margin-bottom: 14px;
   padding: 10px;
+
   border: 1px solid var(--jp-border-color2);
   border-radius: 6px;
-  margin-bottom: 8px;
-}
 
-.software-item:last-child {
-  margin-bottom: 0;
-}
-
-.software-item:hover {
   background: var(--jp-layout-color2);
 }
 
-.software-item strong {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
 
-.software-item a {
-  display: inline-block;
-  margin-top: 6px;
-}
+/* =========================================================
+   PLATFORM SELECTOR
+   ========================================================= */
 
-.software-card {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-
-.software-header {
+.cvmfs-platform-selector-area {
   width: 100%;
-  text-align: left;
-  border: none;
-  background: transparent;
-  padding: 8px;
-  cursor: pointer;
-  font-weight: bold;
 }
 
-.software-details {
-  padding: 10px 16px;
+.cvmfs-platform-selector {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  width: 100%;
+}
+
+.cvmfs-control-label {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 600;
+
+  color: var(--jp-ui-font-color2);
+}
+
+.cvmfs-platform-select {
+  width: 100%;
+  height: 30px;
+
+  box-sizing: border-box;
+
+  padding: 4px 7px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-ui-font-color1);
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.cvmfs-platform-select:focus {
+  outline: none;
+
+  border-color: var(--jp-brand-color1);
+}
+
+
+/* =========================================================
+   PLATFORM DETAILS
+   ========================================================= */
+
+.cvmfs-platform-details {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 8px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+}
+
+.cvmfs-platform-detail {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+
+  padding: 7px 0;
+
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.cvmfs-platform-detail:first-child {
+  padding-top: 0;
+}
+
+.cvmfs-platform-detail:last-child {
+  padding-bottom: 0;
+
+  border-bottom: none;
+}
+
+.cvmfs-platform-detail strong {
+  font-size: 10px;
+  font-weight: 600;
+
+  color: var(--jp-ui-font-color2);
+}
+
+.cvmfs-platform-detail span,
+.cvmfs-platform-detail code {
+  font-size: 11px;
+
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   PLATFORM EXPLANATION
+   ========================================================= */
+
+.cvmfs-platform-explanation {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 8px;
+
+  border-radius: 4px;
+
+  background: var(--jp-layout-color3);
+
+  line-height: 1.45;
+}
+
+.cvmfs-platform-explanation strong {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.cvmfs-platform-explanation span {
+  color: var(--jp-ui-font-color2);
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.cvmfs-search {
+  width: 100%;
+
+  margin-bottom: 12px;
+}
+
+.cvmfs-search-wrapper {
+  position: relative;
+
+  width: 100%;
+
+  margin-top: 4px;
+}
+
+.cvmfs-search-input {
+  width: 100%;
+  height: 30px;
+
+  box-sizing: border-box;
+
+  padding: 5px 9px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-ui-font-color1);
+
+  font-size: 11px;
+
+  outline: none;
+}
+
+.cvmfs-search-input::placeholder {
+  color: var(--jp-ui-font-color2);
+}
+
+.cvmfs-search-input:focus {
+  border-color: var(--jp-brand-color1);
+}
+
+
+/* =========================================================
+   REPOSITORY LIST
+   ========================================================= */
+
+.cvmfs-repository-list {
+  width: 100%;
+}
+
+
+/* =========================================================
+   REPOSITORY
+   ========================================================= */
+
+.cvmfs-repository {
+  width: 100%;
+
+  margin-bottom: 9px;
+}
+
+
+/* Repository header */
+
+.cvmfs-repository-header {
+  width: 100%;
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  box-sizing: border-box;
+
+  padding: 7px 9px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 5px;
+
+  background: var(--jp-layout-color2);
+
+  color: var(--jp-ui-font-color1);
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cvmfs-repository-header:hover {
+  background: var(--jp-layout-color3);
+
+  border-color: var(--jp-brand-color1);
+}
+
+.cvmfs-repository-name {
+  flex: 1;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   REPOSITORY CONTENT
+   ========================================================= */
+
+.cvmfs-repository-content {
+  position: relative;
+
+  margin-top: 6px;
+  margin-left: 8px;
+
+  padding-left: 10px;
+
+  border-left: 2px solid var(--jp-border-color2);
+}
+
+
+/* =========================================================
+   STICKY REPOSITORY COLLAPSE
+   ========================================================= */
+
+.cvmfs-repository-sticky {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 10;
+
+  margin: 0 -2px 7px -12px;
+
+  padding: 5px 0 5px 8px;
+
+  background: var(--jp-layout-color1);
+
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+/* =========================================================
+   REPOSITORY PACKAGE COUNT
+   ========================================================= */
+
+.cvmfs-repository-summary {
+  margin: 0 0 7px 2px;
+
+  color: var(--jp-ui-font-color2);
+
+  font-size: 10px;
+  font-style: italic;
+}
+
+
+/* =========================================================
+   PACKAGE LIST
+   ========================================================= */
+
+.cvmfs-package-list {
+  width: 100%;
+}
+
+
+/* =========================================================
+   PACKAGE / STACK
+   ========================================================= */
+
+.cvmfs-package {
+  width: 100%;
+
+  margin-bottom: 7px;
+}
+
+
+/* Package header */
+
+.cvmfs-package-header {
+  width: 100%;
+  min-height: 32px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  box-sizing: border-box;
+
+  padding: 6px 8px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-ui-font-color1);
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cvmfs-package-header:hover {
+  background: var(--jp-layout-color2);
+
+  border-color: var(--jp-brand-color1);
+}
+
+.cvmfs-package-name {
+  flex: 1;
+
+  min-width: 0;
+
+  overflow-wrap: anywhere;
+}
+
+.cvmfs-version-count {
+  flex-shrink: 0;
+
+  color: var(--jp-ui-font-color2);
+
+  font-size: 9px;
+}
+
+
+/* =========================================================
+   PACKAGE -> VERSION HIERARCHY
+   ========================================================= */
+
+.cvmfs-package-content {
+  margin-top: 5px;
+  margin-left: 10px;
+
+  padding-left: 10px;
+
+  border-left: 1px solid var(--jp-border-color2);
+}
+
+
+/* =========================================================
+   VERSION
+   ========================================================= */
+
+.cvmfs-version {
+  width: 100%;
+
+  margin-bottom: 5px;
+}
+
+
+/* Version header */
+
+.cvmfs-version-header {
+  width: 100%;
+  min-height: 31px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  box-sizing: border-box;
+
+  padding: 6px 8px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-ui-font-color1);
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-size: 11px;
+}
+
+.cvmfs-version-header:hover {
+  background: var(--jp-layout-color2);
+
+  border-color: var(--jp-brand-color1);
+}
+
+.cvmfs-version-name {
+  flex: 1;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   EXPAND ICON
+   ========================================================= */
+
+.cvmfs-expand-icon {
+  width: 12px;
+
+  flex-shrink: 0;
+
+  color: var(--jp-ui-font-color2);
+
+  font-size: 9px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.cvmfs-default-badge,
+.cvmfs-active-badge {
+  flex-shrink: 0;
+
+  padding: 2px 6px;
+
+  border-radius: 9px;
+
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.cvmfs-default-badge {
+  background: var(--jp-layout-color3);
+
+  color: var(--jp-ui-font-color2);
+}
+
+.cvmfs-active-badge {
+  background: var(--jp-brand-color1);
+
+  color: white;
+}
+
+
+/* =========================================================
+   VERSION DETAILS
+   ========================================================= */
+
+.cvmfs-version-details {
+  margin-top: 5px;
+  margin-left: 10px;
+
+  padding: 9px;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--jp-border-color2);
+  border-left: 3px solid var(--jp-brand-color1);
+  border-radius: 4px;
+
+  background: var(--jp-layout-color2);
+
+  font-size: 10px;
+
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   VERSION METADATA
+   ========================================================= */
+
+.cvmfs-version-meta {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  margin-bottom: 7px;
+}
+
+.cvmfs-version-meta span {
+  display: block;
+
+  overflow-wrap: anywhere;
+}
+
+.cvmfs-version-meta strong,
+.cvmfs-version-description strong,
+.cvmfs-modulefile strong {
+  color: var(--jp-ui-font-color2);
+
+  font-weight: 600;
+}
+
+.cvmfs-version-meta code {
+  font-family: var(--jp-code-font-family);
+
+  font-size: 9px;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   VERSION DESCRIPTION
+   ========================================================= */
+
+.cvmfs-version-description {
+  display: block;
+
+  margin-bottom: 7px;
+
+  padding-top: 6px;
+
+  border-top: 1px solid var(--jp-border-color2);
+}
+
+.cvmfs-version-description span {
+  color: var(--jp-ui-font-color2);
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   MODULEFILE
+   ========================================================= */
+
+.cvmfs-modulefile {
+  display: block;
+
+  padding-top: 6px;
+
+  border-top: 1px solid var(--jp-border-color2);
+
+  overflow: hidden;
+}
+
+.cvmfs-modulefile code {
+  display: block;
+
+  margin-top: 3px;
+
+  font-family: var(--jp-code-font-family);
+
+  font-size: 8px;
+
+  color: var(--jp-ui-font-color2);
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.cvmfs-actions {
+  display: flex;
+
+  gap: 7px;
+
+  margin-top: 10px;
+}
+
+
+/* Base button */
+
+.cvmfs-button {
+  min-height: 28px;
+
+  padding: 5px 11px;
+
+  border-radius: 4px;
+
+  font-size: 10px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+
+/* Activate */
+
+.cvmfs-button-primary {
+  border: 1px solid var(--jp-brand-color1);
+
+  background: var(--jp-brand-color1);
+
+  color: white;
+}
+
+.cvmfs-button-primary:hover:not(:disabled) {
+  background: var(--jp-brand-color0);
+
+  border-color: var(--jp-brand-color0);
+}
+
+
+/* Deactivate */
+
+.cvmfs-button-danger {
+  border: 1px solid var(--jp-error-color1);
+
+  background: var(--jp-error-color1);
+
+  color: white;
+}
+
+.cvmfs-button-danger:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+
+/* Open Terminal */
+
+.cvmfs-button-terminal {
+  border: 1px solid var(--jp-brand-color1);
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-brand-color1);
+}
+
+.cvmfs-button-terminal:hover:not(:disabled) {
+  background: var(--jp-layout-color2);
+}
+
+
+/* Disabled */
+
+.cvmfs-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SUCCESS MESSAGE
+   ========================================================= */
+
+.cvmfs-success {
+  display: block;
+
+  margin-top: 8px;
+
+  padding: 7px 8px;
+
+  border: 1px solid var(--jp-success-color1);
+
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+
+  font-size: 9px;
+
+  line-height: 1.45;
+}
+
+.cvmfs-success > strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: var(--jp-success-color1);
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.cvmfs-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cvmfs-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cvmfs-container::-webkit-scrollbar-thumb {
+  background: var(--jp-border-color2);
+
+  border-radius: 3px;
+}
+
+.cvmfs-container::-webkit-scrollbar-thumb:hover {
+  background: var(--jp-ui-font-color2);
+}
+
+
+/* =========================================================
+   SMALL SIDEBAR
+   ========================================================= */
+
+@media (max-width: 350px) {
+
+  .cvmfs-container {
+    padding: 9px;
+  }
+
+  .cvmfs-header h2 {
+    font-size: 15px;
+  }
+
+  .cvmfs-platform-card {
+    padding: 8px;
+  }
+
+  .cvmfs-version-meta {
+    gap: 4px;
+  }
+
 }

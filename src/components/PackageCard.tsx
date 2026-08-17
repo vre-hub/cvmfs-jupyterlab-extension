@@ -1,10 +1,16 @@
 import * as React from 'react';
+
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { VersionCard, Version } from './VersionCard';
+
 import {
   ServerConnection,
   KernelSpec
 } from '@jupyterlab/services';
+
+import {
+  VersionCard,
+  Version
+} from './VersionCard';
 
 export interface Package {
   package: string;
@@ -30,8 +36,10 @@ export function PackageCard({
   kernelSpecManager,
   app
 }: Props) {
-  const [expandedVersion, setExpandedVersion] =
-    React.useState<string | null>(null);
+  const [
+    expandedVersion,
+    setExpandedVersion
+  ] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!expanded) {
@@ -40,42 +48,71 @@ export function PackageCard({
   }, [expanded]);
 
   return (
-    <div className="package-card">
+    <div className="cvmfs-package">
+
       <button
-        className="package-header"
+        type="button"
+        className="cvmfs-package-header"
         onClick={onToggle}
+        aria-expanded={expanded}
       >
-        {expanded ? '▼' : '▶'} {pkg.package}
+        <span className="cvmfs-expand-icon">
+          {expanded ? '▼' : '▶'}
+        </span>
+
+        <span className="cvmfs-package-name">
+          {pkg.package}
+        </span>
+
+        <span className="cvmfs-version-count">
+          {pkg.versions.length}{' '}
+          {pkg.versions.length === 1
+            ? 'version'
+            : 'versions'}
+        </span>
       </button>
 
       {expanded && (
-        <div className="package-versions">
-          {pkg.versions.map(version => (
-            <VersionCard
-              key={version.full}
-              version={version}
-              category={pkg.categories}
-              isDefault={
-                version.versionName ===
-                pkg.defaultVersionName
-              }
-              expanded={
-                expandedVersion === version.full
-              }
-              onToggle={() =>
-                setExpandedVersion(
-                  expandedVersion === version.full
-                    ? null
-                    : version.full
-                )
-              }
-              serverSettings={serverSettings}
-              kernelSpecManager={kernelSpecManager}
-              app={app}
-            />
-          ))}
+        <div className="cvmfs-package-content">
+
+          {pkg.versions.map(
+            version => (
+              <VersionCard
+                key={version.full}
+                version={version}
+                category={
+                  pkg.categories
+                }
+                isDefault={
+                  version.versionName ===
+                  pkg.defaultVersionName
+                }
+                expanded={
+                  expandedVersion ===
+                  version.full
+                }
+                onToggle={() =>
+                  setExpandedVersion(
+                    expandedVersion ===
+                      version.full
+                      ? null
+                      : version.full
+                  )
+                }
+                serverSettings={
+                  serverSettings
+                }
+                kernelSpecManager={
+                  kernelSpecManager
+                }
+                app={app}
+              />
+            )
+          )}
+
         </div>
       )}
+
     </div>
   );
 }

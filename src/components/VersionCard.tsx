@@ -74,6 +74,10 @@ export function VersionCard({
   const requestGeneration =
     React.useRef(0);
 
+  /*
+   * Check whether this module already has
+   * an active kernel for the selected platform.
+   */
   React.useEffect(() => {
     const generation =
       ++requestGeneration.current;
@@ -101,7 +105,8 @@ export function VersionCard({
 
         if (
           cancelled ||
-          generation !== requestGeneration.current
+          generation !==
+            requestGeneration.current
         ) {
           return;
         }
@@ -109,7 +114,9 @@ export function VersionCard({
         const selectedPlatform =
           platformData.selected;
 
-        setPlatform(selectedPlatform);
+        setPlatform(
+          selectedPlatform
+        );
 
         const kernel =
           kernelData.kernels.find(
@@ -132,7 +139,8 @@ export function VersionCard({
       } catch (error) {
         if (
           !cancelled &&
-          generation === requestGeneration.current
+          generation ===
+            requestGeneration.current
         ) {
           console.error(
             'Failed to check kernel status:',
@@ -152,8 +160,14 @@ export function VersionCard({
     version.full
   ]);
 
+  /*
+   * Activate module and create kernel.
+   */
   const handleActivate = async () => {
-    if (!platform || actionLoading) {
+    if (
+      !platform ||
+      actionLoading
+    ) {
       return;
     }
 
@@ -179,7 +193,7 @@ export function VersionCard({
                 version.full
               ],
 
-              platform: platform,
+              platform,
 
               display_name:
                 `Python (${version.full} • ${platform})`
@@ -219,8 +233,15 @@ export function VersionCard({
     }
   };
 
+  /*
+   * Remove the kernel associated with
+   * this module.
+   */
   const handleDeactivate = async () => {
-    if (!kernelName || actionLoading) {
+    if (
+      !kernelName ||
+      actionLoading
+    ) {
       return;
     }
 
@@ -265,6 +286,10 @@ export function VersionCard({
     }
   };
 
+  /*
+   * Create a terminal with the selected
+   * module environment and open it.
+   */
   const handleOpenTerminal = async () => {
     if (
       !platform ||
@@ -309,11 +334,7 @@ export function VersionCard({
 
       /*
        * The backend creates the terminal
-       * and returns its JupyterLab terminal
-       * name.
-       *
-       * Now ask JupyterLab to open that
-       * existing terminal.
+       * and returns its JupyterLab name.
        */
       await app.commands.execute(
         'terminal:open',
@@ -335,114 +356,227 @@ export function VersionCard({
   };
 
   return (
-    <>
-      <button
-        className="version-header"
-        onClick={onToggle}
-      >
-        {expanded ? '▼' : '▶'}{' '}
-        {version.versionName}
+    <div
+      className={`cvmfs-version ${
+        expanded
+          ? 'cvmfs-version-expanded'
+          : ''
+      }`}
+    >
 
-        {isDefault &&
-          ' (default)'}
+      {/* =================================================
+          VERSION HEADER
+          ================================================= */}
+
+      <button
+        type="button"
+        className="cvmfs-version-header"
+        onClick={onToggle}
+        aria-expanded={expanded}
+      >
+
+        <span className="cvmfs-expand-icon">
+          {expanded ? '▼' : '▶'}
+        </span>
+
+        <span className="cvmfs-version-name">
+          {version.versionName}
+        </span>
+
+        {isDefault && (
+          <span className="cvmfs-default-badge">
+            default
+          </span>
+        )}
+
+        {kernelName && (
+          <span className="cvmfs-active-badge">
+            kernel active
+          </span>
+        )}
+
       </button>
 
+
+      {/* =================================================
+          VERSION DETAILS
+          ================================================= */}
+
       {expanded && (
-        <div className="version-details">
+        <div className="cvmfs-version-details">
 
-          <p>
-            <b>Category</b>
-          </p>
+          {/* ---------------------------------------------
+              Metadata
+              --------------------------------------------- */}
 
-          <p>
-            {category}
-          </p>
+          <div className="cvmfs-version-meta">
 
-          <p>
-            <b>Module</b>
-          </p>
+            <span>
+              <strong>
+                Category:
+              </strong>{' '}
 
-          <p>
-            {version.full}
-          </p>
+              {category}
+            </span>
 
-          <p>
-            <b>Platform</b>
-          </p>
+            <span>
+              <strong>
+                Module:
+              </strong>{' '}
 
-          <p>
-            {platform ??
-              'Detecting...'}
-          </p>
+              <code>
+                {version.full}
+              </code>
+            </span>
 
-          <p>
-            <b>Help</b>
-          </p>
+            <span>
+              <strong>
+                Platform:
+              </strong>{' '}
 
-          <pre>
-            {version.help}
-          </pre>
+              <code>
+                {platform ??
+                  'Detecting...'}
+              </code>
+            </span>
 
-          <p>
-            <b>Modulefile</b>
-          </p>
+            {kernelName && (
+              <span>
+                <strong>
+                  Kernel:
+                </strong>{' '}
 
-          <p>
-            {version.path}
-          </p>
+                <code>
+                  {kernelName}
+                </code>
+              </span>
+            )}
 
-          <button
-            disabled={
-              actionLoading ||
-              !platform
-            }
+          </div>
 
-            onClick={
-              kernelName
-                ? handleDeactivate
-                : handleActivate
-            }
-          >
-            {actionLoading
-              ? action ===
-                'deactivate'
-                ? 'Deactivating...'
-                : 'Activating...'
-              : kernelName
-                ? 'Deactivate'
-                : 'Activate'}
-          </button>
 
-          <button
-            onClick={
-              handleOpenTerminal
-            }
+          {/* ---------------------------------------------
+              Description
+              --------------------------------------------- */}
 
-            disabled={
-              !platform ||
-              !kernelName ||
-              actionLoading
-            }
-          >
-            Open Terminal
-          </button>
+          {version.help && (
+            <div className="cvmfs-version-description">
+
+              <strong>
+                Description:
+              </strong>{' '}
+
+              <span>
+                {version.help
+                  .replace(
+                    /\s+/g,
+                    ' '
+                  )
+                  .trim()}
+              </span>
+
+            </div>
+          )}
+
+
+          {/* ---------------------------------------------
+              Modulefile
+              --------------------------------------------- */}
+
+          <div className="cvmfs-modulefile">
+
+            <strong>
+              Modulefile:
+            </strong>
+
+            <code
+              title={version.path}
+            >
+              {version.path}
+            </code>
+
+          </div>
+
+
+          {/* ---------------------------------------------
+              Actions
+              --------------------------------------------- */}
+
+          <div className="cvmfs-actions">
+
+            <button
+              type="button"
+              className={
+                kernelName
+                  ? 'cvmfs-button cvmfs-button-danger'
+                  : 'cvmfs-button cvmfs-button-primary'
+              }
+              disabled={
+                actionLoading ||
+                !platform
+              }
+              onClick={
+                kernelName
+                  ? handleDeactivate
+                  : handleActivate
+              }
+            >
+              {actionLoading
+                ? action === 'deactivate'
+                  ? 'Deactivating...'
+                  : 'Activating...'
+                : kernelName
+                  ? 'Deactivate'
+                  : 'Activate'}
+            </button>
+
+
+            <button
+              type="button"
+              className="cvmfs-button cvmfs-button-terminal"
+              onClick={
+                handleOpenTerminal
+              }
+              disabled={
+                !platform ||
+                !kernelName ||
+                actionLoading
+              }
+            >
+              Open Terminal
+            </button>
+
+          </div>
+
+
+          {/* ---------------------------------------------
+              Activation success
+              --------------------------------------------- */}
 
           {justActivated && (
-            <p>
-              <b>
+            <div className="cvmfs-success">
+
+              <strong>
                 Kernel ready.
-              </b>{' '}
+              </strong>
 
-              Select{' '}
+              <span>
+                Select{' '}
 
-              {`Python (${version.full} • ${platform})`}{' '}
+                <strong>
+                  {`Python (${version.full} • ${platform})`}
+                </strong>{' '}
 
-              from the kernel picker.
-            </p>
+                from the JupyterLab
+                kernel picker.
+              </span>
+
+            </div>
           )}
 
         </div>
       )}
-    </>
+
+    </div>
   );
 }

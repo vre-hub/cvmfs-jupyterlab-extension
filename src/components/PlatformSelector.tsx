@@ -12,21 +12,37 @@ export function PlatformSelector({
   onChange
 }: Props) {
   return (
-    <div className="platform-selector">
-      <label>
-        <b>Platform</b>
+    <div className="cvmfs-platform-selector">
+
+      <label
+        htmlFor="cvmfs-platform-select"
+        className="cvmfs-control-label"
+      >
+        Software stack
       </label>
 
       <select
+        id="cvmfs-platform-select"
+        className="cvmfs-platform-select"
         value={selected}
-        onChange={e => onChange(e.target.value)}
+        onChange={event =>
+          onChange(
+            event.target.value
+          )
+        }
       >
+
         {platforms.map(platform => (
-          <option key={platform} value={platform}>
+          <option
+            key={platform}
+            value={platform}
+          >
             {platform}
           </option>
         ))}
+
       </select>
+
     </div>
   );
 }

@@ -339,12 +339,7 @@ class TerminalRouteHandler(APIHandler):
                 name=name,
                 shell_command=command,
             )
-            print("========== CVMFS TERMINAL DEBUG ==========")
-            print("manager id:", id(terminal_manager))
-            print("requested name:", repr(name))
-            print("returned terminal:", terminal)
-            print("terminal keys:", list(terminal_manager.terminals.keys()))
-            print("==========================================")
+            
             self.finish(
                 json.dumps(
                     {
