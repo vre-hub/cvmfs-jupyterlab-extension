@@ -41,6 +41,36 @@ export function ActiveModules({
   const [loadingKernel, setLoadingKernel] =
     React.useState<string | null>(null);
 
+  const [error, setError] =
+    React.useState<string | null>(null);
+
+  /*
+   * Extract a user-friendly message without
+   * exposing backend tracebacks.
+   */
+  const getErrorMessage = (
+    error: unknown,
+    fallback: string
+  ): string => {
+    if (
+      error instanceof ServerConnection.ResponseError
+    ) {
+      return error.message || fallback;
+    }
+
+    if (
+      error instanceof ServerConnection.NetworkError
+    ) {
+      return 'Could not connect to the CVMFS backend. Please check that the server is available.';
+    }
+
+    if (error instanceof Error) {
+      return error.message || fallback;
+    }
+
+    return fallback;
+  };
+
   const loadKernels = async () => {
     try {
       const response =
@@ -56,10 +86,18 @@ export function ActiveModules({
           kernel => kernel.available
         )
       );
+
     } catch (error) {
       console.error(
         'Failed to load active modules:',
         error
+      );
+
+      setError(
+        `Unable to load active modules: ${getErrorMessage(
+          error,
+          'could not retrieve the active module list.'
+        )}`
       );
     }
   };
@@ -77,6 +115,8 @@ export function ActiveModules({
     if (loadingKernel) {
       return;
     }
+
+    setError(null);
 
     setLoadingKernel(
       kernel.kernel_name
@@ -102,6 +142,14 @@ export function ActiveModules({
         'Failed to deactivate module:',
         error
       );
+
+      setError(
+        `Deactivation failed: ${getErrorMessage(
+          error,
+          'the active module could not be deactivated.'
+        )}`
+      );
+
     } finally {
       setLoadingKernel(null);
     }
@@ -113,6 +161,8 @@ export function ActiveModules({
     if (loadingKernel) {
       return;
     }
+
+    setError(null);
 
     setLoadingKernel(
       kernel.kernel_name
@@ -155,6 +205,14 @@ export function ActiveModules({
         'Failed to open terminal:',
         error
       );
+
+      setError(
+        `Terminal failed: ${getErrorMessage(
+          error,
+          'the module terminal could not be opened.'
+        )}`
+      );
+
     } finally {
       setLoadingKernel(null);
     }
@@ -186,6 +244,21 @@ export function ActiveModules({
 
       {expanded && (
         <div className="cvmfs-active-modules-content">
+
+          {error && (
+            <div
+              className="cvmfs-error"
+              role="alert"
+            >
+              <strong>
+                Error:
+              </strong>{' '}
+
+              <span>
+                {error}
+              </span>
+            </div>
+          )}
 
           {kernels.length === 0 ? (
             <span className="cvmfs-no-active-modules">

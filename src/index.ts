@@ -2,7 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
+import { ServerConnection } from '@jupyterlab/services';
 import { requestAPI } from './request';
 import { CvmfsPanel } from './panel';
 
@@ -26,6 +26,14 @@ interface PlatformInfo {
   selected: string;
 }
 
+const emptyPlatform: PlatformInfo = {
+  architecture: '',
+  os: '',
+  available: [],
+  compatible: [],
+  selected: ''
+};
+
 const plugin: JupyterFrontEndPlugin<void> = {
   id: 'cvmfs_extension:plugin',
   autoStart: true,
@@ -34,34 +42,104 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const serverSettings =
       app.serviceManager.serverSettings;
 
+    let platform: PlatformInfo =
+      emptyPlatform;
+
+    let repositories: Repository[] = [];
+
+    let initialError:
+      string | null = null;
+
+    const getErrorMessage = (
+      error: unknown,
+      fallback: string
+    ): string => {
+      if (
+        error instanceof
+        ServerConnection.ResponseError
+      ) {
+        return (
+          error.message ||
+          fallback
+        );
+      }
+
+      if (
+        error instanceof
+        ServerConnection.NetworkError
+      ) {
+        return 'Could not connect to the CVMFS backend. Please check that the server is available.';
+      }
+
+      if (error instanceof Error) {
+        return (
+          error.message ||
+          fallback
+        );
+      }
+
+      return fallback;
+    };
+
     try {
-      const platform =
+      platform =
         await requestAPI<PlatformInfo>(
           'platform',
           serverSettings
         );
+    } catch (error) {
+      console.error(
+        'Failed to load platform:',
+        error
+      );
 
-      const catalog =
-        await requestAPI<CatalogResponse>(
-          `catalog?platform=${platform.selected}`,
-          serverSettings
+      initialError =
+        `Unable to load CVMFS software: ${getErrorMessage(
+          error,
+          'Could not determine a compatible platform. Please check that CVMFS/Lmod is available.'
+        )}`;
+    }
+
+    if (!initialError) {
+      try {
+        const catalog =
+          await requestAPI<CatalogResponse>(
+            `catalog?platform=${encodeURIComponent(
+              platform.selected
+            )}`,
+            serverSettings
+          );
+
+        repositories =
+          catalog.repositories;
+
+      } catch (error) {
+        console.error(
+          'Failed to load catalog:',
+          error
         );
 
-      const panel = new CvmfsPanel({
-        repositories: catalog.repositories,
-        platform,
-        serverSettings,
-        kernelSpecManager:
-          app.serviceManager.kernelspecs,
-        app
-      });
-
-      app.shell.add(panel, 'left', {
-        rank: 600
-      });
-    } catch (err) {
-      console.error(err);
+        initialError =
+          `Unable to load CVMFS software: ${getErrorMessage(
+            error,
+            'Could not load the software catalogue. Please check that CVMFS/Lmod is available.'
+          )}`;
+      }
     }
+
+    const panel = new CvmfsPanel({
+      repositories,
+      platform,
+      serverSettings,
+      kernelSpecManager:
+        app.serviceManager.kernelspecs,
+      app,
+      initialError
+    });
+
+    app.shell.add(panel, 'left', {
+      rank: 600
+    });
   }
 };
 

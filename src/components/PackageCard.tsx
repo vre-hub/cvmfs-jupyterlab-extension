@@ -36,9 +36,7 @@ export function PackageCard({
   onToggle,
   serverSettings,
   kernelSpecManager,
-  app,
-  onKernelChange,
-  kernelRefresh
+  app
 }: Props) {
   const [
     expandedVersion,
@@ -112,12 +110,6 @@ export function PackageCard({
                   kernelSpecManager
                 }
                 app={app}
-                onKernelChange={
-                  onKernelChange
-                }
-                kernelRefresh={
-                  kernelRefresh
-                }
               />
             )
           )}

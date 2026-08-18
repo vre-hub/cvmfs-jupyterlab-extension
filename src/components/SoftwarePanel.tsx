@@ -52,6 +52,7 @@ interface Props {
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
   app: JupyterFrontEnd;
+  initialError?: string | null;
 }
 
 export function SoftwarePanel({
@@ -59,7 +60,8 @@ export function SoftwarePanel({
   initialPlatform,
   serverSettings,
   kernelSpecManager,
-  app
+  app,
+  initialError
 }: Props) {
   const [repositories, setRepositories] =
     React.useState(initialRepositories);
@@ -83,33 +85,86 @@ export function SoftwarePanel({
   const [kernelRefresh, setKernelRefresh] =
     React.useState(0);
 
+  const [error, setError] =
+    React.useState<string | null>(
+      initialError ?? null
+    );
+
   const handleKernelChange = () => {
     setKernelRefresh(
       value => value + 1
     );
   };
 
+  /*
+   * Extract a user-friendly message without
+   * exposing backend tracebacks.
+   */
+  const getErrorMessage = (
+    error: unknown,
+    fallback: string
+  ): string => {
+    if (
+      error instanceof ServerConnection.ResponseError
+    ) {
+      return error.message || fallback;
+    }
+
+    if (
+      error instanceof ServerConnection.NetworkError
+    ) {
+      return 'Could not connect to the CVMFS backend. Please check that the server is available.';
+    }
+
+    if (error instanceof Error) {
+      return error.message || fallback;
+    }
+
+    return fallback;
+  };
+
+  /*
+   * Change the selected LCG platform and
+   * reload its catalogue.
+   */
   const changePlatform = async (
     newPlatform: string
   ) => {
-    const response =
-      await requestAPI<CatalogResponse>(
-        `catalog?platform=${encodeURIComponent(
-          newPlatform
-        )}`,
-        serverSettings
+    setError(null);
+
+    try {
+      const response =
+        await requestAPI<CatalogResponse>(
+          `catalog?platform=${encodeURIComponent(
+            newPlatform
+          )}`,
+          serverSettings
+        );
+
+      setPlatform({
+        ...platform,
+        selected: newPlatform
+      });
+
+      setRepositories(
+        response.repositories
       );
 
-    setPlatform({
-      ...platform,
-      selected: newPlatform
-    });
+      setExpandedRepository(null);
 
-    setRepositories(
-      response.repositories
-    );
+    } catch (error) {
+      console.error(
+        'Failed to switch platform:',
+        error
+      );
 
-    setExpandedRepository(null);
+      setError(
+        `Unable to switch platform: ${getErrorMessage(
+          error,
+          `failed to load the catalogue for ${newPlatform}.`
+        )}`
+      );
+    }
   };
 
   const lcgRepository =
@@ -152,8 +207,28 @@ export function SoftwarePanel({
         kernelSpecManager={kernelSpecManager}
         app={app}
         refresh={kernelRefresh}
-        onKernelChange={handleKernelChange}
+        onKernelChange={
+          handleKernelChange
+        }
       />
+
+
+      {/* ERROR */}
+
+      {error && (
+        <div
+          className="cvmfs-error"
+          role="alert"
+        >
+          <strong>
+            Error:
+          </strong>{' '}
+
+          <span>
+            {error}
+          </span>
+        </div>
+      )}
 
 
       {/* LCG SOFTWARE */}

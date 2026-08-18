@@ -1016,6 +1016,37 @@
   color: var(--jp-success-color1);
 }
 
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+.cvmfs-error {
+  display: block;
+
+  margin-top: 8px;
+
+  padding: 7px 8px;
+
+  border: 1px solid var(--jp-error-color1);
+
+  border-radius: 4px;
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-ui-font-color1);
+
+  font-size: 9px;
+
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
+}
+
+.cvmfs-error > strong {
+  color: var(--jp-error-color1);
+
+  font-weight: 600;
+}
 
 /* =========================================================
    SCROLLBAR

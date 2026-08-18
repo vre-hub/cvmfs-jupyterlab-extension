@@ -42,8 +42,6 @@ interface Props {
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
   app: JupyterFrontEnd;
-  onKernelChange: () => void;
-  kernelRefresh: number;
 }
 
 export function VersionCard({
@@ -54,16 +52,14 @@ export function VersionCard({
   onToggle,
   serverSettings,
   kernelSpecManager,
-  app,
-  onKernelChange,
-  kernelRefresh
+  app
 }: Props) {
   const [actionLoading, setActionLoading] =
     React.useState(false);
 
   const [action, setAction] =
     React.useState<
-      'activate' | 'deactivate' | null
+      'activate' | 'deactivate' | 'terminal' | null
     >(null);
 
   const [kernelName, setKernelName] =
@@ -75,8 +71,42 @@ export function VersionCard({
   const [platform, setPlatform] =
     React.useState<string | null>(null);
 
+  const [error, setError] =
+    React.useState<string | null>(null);
+
   const requestGeneration =
     React.useRef(0);
+
+  /*
+   * Extract a user-friendly error message.
+   *
+   * Backend tracebacks are not shown directly.
+   */
+  const getErrorMessage = (
+    error: unknown,
+    fallback: string
+  ): string => {
+    if (
+      error instanceof ServerConnection.ResponseError
+    ) {
+      return error.message || fallback;
+    }
+
+    if (
+      error instanceof ServerConnection.NetworkError
+    ) {
+      return (
+        'Could not connect to the CVMFS backend. ' +
+        'Please check that the server is available.'
+      );
+    }
+
+    if (error instanceof Error) {
+      return error.message || fallback;
+    }
+
+    return fallback;
+  };
 
   /*
    * Check whether this module already has
@@ -89,6 +119,8 @@ export function VersionCard({
     let cancelled = false;
 
     const loadStatus = async () => {
+      setError(null);
+
       try {
         const [
           platformData,
@@ -151,6 +183,13 @@ export function VersionCard({
             'Failed to check kernel status:',
             error
           );
+
+          setError(
+            getErrorMessage(
+              error,
+              `Could not check the activation status for ${version.full}.`
+            )
+          );
         }
       }
     };
@@ -162,8 +201,7 @@ export function VersionCard({
     };
   }, [
     serverSettings,
-    version.full,
-    kernelRefresh
+    version.full
   ]);
 
   /*
@@ -179,6 +217,7 @@ export function VersionCard({
 
     requestGeneration.current++;
 
+    setError(null);
     setActionLoading(true);
     setAction('activate');
     setJustActivated(false);
@@ -220,11 +259,6 @@ export function VersionCard({
 
       await kernelSpecManager.refreshSpecs();
 
-      /*
-       * Immediately refresh Active Modules.
-       */
-      onKernelChange();
-
       console.log(
         'Kernel created:',
         data
@@ -235,6 +269,14 @@ export function VersionCard({
         'Failed to activate module:',
         error
       );
+
+      setError(
+        `Activation failed: ${getErrorMessage(
+          error,
+          `module ${version.full} could not be loaded.`
+        )}`
+      );
+
     } finally {
       setActionLoading(false);
       setAction(null);
@@ -258,6 +300,7 @@ export function VersionCard({
     const kernelToRemove =
       kernelName;
 
+    setError(null);
     setActionLoading(true);
     setAction('deactivate');
 
@@ -275,11 +318,6 @@ export function VersionCard({
 
       await kernelSpecManager.refreshSpecs();
 
-      /*
-       * Immediately refresh Active Modules.
-       */
-      onKernelChange();
-
       console.log(
         'Kernel removed:',
         kernelToRemove
@@ -287,9 +325,17 @@ export function VersionCard({
 
     } catch (error) {
       console.error(
-        'Failed to deactivate module:',
+        'Failed to deactivate kernel:',
         error
       );
+
+      setError(
+        `Deactivation failed: ${getErrorMessage(
+          error,
+          'the active module could not be deactivated.'
+        )}`
+      );
+
     } finally {
       setActionLoading(false);
       setAction(null);
@@ -308,6 +354,10 @@ export function VersionCard({
     ) {
       return;
     }
+
+    setError(null);
+    setActionLoading(true);
+    setAction('terminal');
 
     try {
       const data =
@@ -337,6 +387,11 @@ export function VersionCard({
           }
         );
 
+      console.log(
+        'Terminal created:',
+        data
+      );
+
       await app.commands.execute(
         'terminal:open',
         {
@@ -344,11 +399,27 @@ export function VersionCard({
         }
       );
 
+      console.log(
+        'Terminal opened:',
+        data.name
+      );
+
     } catch (error) {
       console.error(
         'Failed to create/open terminal:',
         error
       );
+
+      setError(
+        `Terminal failed: ${getErrorMessage(
+          error,
+          'the module terminal could not be opened.'
+        )}`
+      );
+
+    } finally {
+      setActionLoading(false);
+      setAction(null);
     }
   };
 
@@ -360,6 +431,10 @@ export function VersionCard({
           : ''
       }`}
     >
+
+      {/* =================================================
+          VERSION HEADER
+          ================================================= */}
 
       <button
         type="button"
@@ -390,8 +465,17 @@ export function VersionCard({
 
       </button>
 
+
+      {/* =================================================
+          VERSION DETAILS
+          ================================================= */}
+
       {expanded && (
         <div className="cvmfs-version-details">
+
+          {/* ---------------------------------------------
+              Metadata
+              --------------------------------------------- */}
 
           <div className="cvmfs-version-meta">
 
@@ -438,6 +522,11 @@ export function VersionCard({
 
           </div>
 
+
+          {/* ---------------------------------------------
+              Description
+              --------------------------------------------- */}
+
           {version.help && (
             <div className="cvmfs-version-description">
 
@@ -457,6 +546,11 @@ export function VersionCard({
             </div>
           )}
 
+
+          {/* ---------------------------------------------
+              Modulefile
+              --------------------------------------------- */}
+
           <div className="cvmfs-modulefile">
 
             <strong>
@@ -470,6 +564,11 @@ export function VersionCard({
             </code>
 
           </div>
+
+
+          {/* ---------------------------------------------
+              Actions
+              --------------------------------------------- */}
 
           <div className="cvmfs-actions">
 
@@ -493,11 +592,14 @@ export function VersionCard({
               {actionLoading
                 ? action === 'deactivate'
                   ? 'Deactivating...'
-                  : 'Activating...'
+                  : action === 'activate'
+                    ? 'Activating...'
+                    : 'Working...'
                 : kernelName
                   ? 'Deactivate'
                   : 'Activate'}
             </button>
+
 
             <button
               type="button"
@@ -511,10 +613,38 @@ export function VersionCard({
                 actionLoading
               }
             >
-              Open Terminal
+              {actionLoading &&
+              action === 'terminal'
+                ? 'Opening...'
+                : 'Open Terminal'}
             </button>
 
           </div>
+
+
+          {/* ---------------------------------------------
+              ERROR
+              --------------------------------------------- */}
+
+          {error && (
+            <div
+              className="cvmfs-error"
+              role="alert"
+            >
+              <strong>
+                Error:
+              </strong>{' '}
+
+              <span>
+                {error}
+              </span>
+            </div>
+          )}
+
+
+          {/* ---------------------------------------------
+              Activation success
+              --------------------------------------------- */}
 
           {justActivated && (
             <div className="cvmfs-success">

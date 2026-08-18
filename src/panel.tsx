@@ -30,6 +30,7 @@ interface Props {
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
   app: JupyterFrontEnd;
+  initialError?: string | null;
 }
 
 export class CvmfsPanel extends ReactWidget {
@@ -38,7 +39,8 @@ export class CvmfsPanel extends ReactWidget {
 
     this.id = 'cvmfs-panel';
     this.title.label = 'CVMFS';
-    this.title.caption = 'CVMFS Software Explorer';
+    this.title.caption =
+      'CVMFS Software Explorer';
     this.addClass('cvmfs-panel');
   }
 
@@ -58,6 +60,9 @@ export class CvmfsPanel extends ReactWidget {
           this.props.kernelSpecManager
         }
         app={this.props.app}
+        initialError={
+          this.props.initialError
+        }
       />
     );
   }
