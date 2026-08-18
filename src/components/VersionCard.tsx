@@ -42,6 +42,8 @@ interface Props {
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
   app: JupyterFrontEnd;
+  onKernelChange: () => void;
+  kernelRefresh: number;
 }
 
 export function VersionCard({
@@ -52,7 +54,9 @@ export function VersionCard({
   onToggle,
   serverSettings,
   kernelSpecManager,
-  app
+  app,
+  onKernelChange,
+  kernelRefresh
 }: Props) {
   const [actionLoading, setActionLoading] =
     React.useState(false);
@@ -136,6 +140,7 @@ export function VersionCard({
         );
 
         setJustActivated(false);
+
       } catch (error) {
         if (
           !cancelled &&
@@ -157,7 +162,8 @@ export function VersionCard({
     };
   }, [
     serverSettings,
-    version.full
+    version.full,
+    kernelRefresh
   ]);
 
   /*
@@ -212,16 +218,18 @@ export function VersionCard({
 
       setJustActivated(true);
 
-      /*
-       * Tell JupyterLab that a new
-       * kernelspec now exists.
-       */
       await kernelSpecManager.refreshSpecs();
+
+      /*
+       * Immediately refresh Active Modules.
+       */
+      onKernelChange();
 
       console.log(
         'Kernel created:',
         data
       );
+
     } catch (error) {
       console.error(
         'Failed to activate module:',
@@ -265,19 +273,21 @@ export function VersionCard({
       setKernelName(null);
       setJustActivated(false);
 
-      /*
-       * Tell JupyterLab that the
-       * kernelspec was removed.
-       */
       await kernelSpecManager.refreshSpecs();
+
+      /*
+       * Immediately refresh Active Modules.
+       */
+      onKernelChange();
 
       console.log(
         'Kernel removed:',
         kernelToRemove
       );
+
     } catch (error) {
       console.error(
-        'Failed to deactivate kernel:',
+        'Failed to deactivate module:',
         error
       );
     } finally {
@@ -327,15 +337,6 @@ export function VersionCard({
           }
         );
 
-      console.log(
-        'Terminal created:',
-        data
-      );
-
-      /*
-       * The backend creates the terminal
-       * and returns its JupyterLab name.
-       */
       await app.commands.execute(
         'terminal:open',
         {
@@ -343,10 +344,6 @@ export function VersionCard({
         }
       );
 
-      console.log(
-        'Terminal opened:',
-        data.name
-      );
     } catch (error) {
       console.error(
         'Failed to create/open terminal:',
@@ -363,10 +360,6 @@ export function VersionCard({
           : ''
       }`}
     >
-
-      {/* =================================================
-          VERSION HEADER
-          ================================================= */}
 
       <button
         type="button"
@@ -397,17 +390,8 @@ export function VersionCard({
 
       </button>
 
-
-      {/* =================================================
-          VERSION DETAILS
-          ================================================= */}
-
       {expanded && (
         <div className="cvmfs-version-details">
-
-          {/* ---------------------------------------------
-              Metadata
-              --------------------------------------------- */}
 
           <div className="cvmfs-version-meta">
 
@@ -454,11 +438,6 @@ export function VersionCard({
 
           </div>
 
-
-          {/* ---------------------------------------------
-              Description
-              --------------------------------------------- */}
-
           {version.help && (
             <div className="cvmfs-version-description">
 
@@ -478,11 +457,6 @@ export function VersionCard({
             </div>
           )}
 
-
-          {/* ---------------------------------------------
-              Modulefile
-              --------------------------------------------- */}
-
           <div className="cvmfs-modulefile">
 
             <strong>
@@ -496,11 +470,6 @@ export function VersionCard({
             </code>
 
           </div>
-
-
-          {/* ---------------------------------------------
-              Actions
-              --------------------------------------------- */}
 
           <div className="cvmfs-actions">
 
@@ -530,7 +499,6 @@ export function VersionCard({
                   : 'Activate'}
             </button>
 
-
             <button
               type="button"
               className="cvmfs-button cvmfs-button-terminal"
@@ -547,11 +515,6 @@ export function VersionCard({
             </button>
 
           </div>
-
-
-          {/* ---------------------------------------------
-              Activation success
-              --------------------------------------------- */}
 
           {justActivated && (
             <div className="cvmfs-success">

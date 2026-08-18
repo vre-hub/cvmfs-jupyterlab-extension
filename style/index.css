@@ -1,4 +1,214 @@
 /* =========================================================
+   ACTIVE MODULES
+   ========================================================= */
+
+.cvmfs-active-modules {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 6px;
+
+  background: var(--jp-layout-color2);
+}
+
+.cvmfs-active-modules-header {
+  width: 100%;
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  box-sizing: border-box;
+
+  padding: 7px 9px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--jp-ui-font-color1);
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cvmfs-active-modules-header:hover {
+  background: var(--jp-layout-color3);
+}
+
+.cvmfs-active-modules-title {
+  flex: 1;
+}
+
+.cvmfs-active-modules-count {
+  min-width: 18px;
+
+  padding: 2px 6px;
+
+  box-sizing: border-box;
+
+  border-radius: 9px;
+
+  background: var(--jp-layout-color3);
+  color: var(--jp-ui-font-color2);
+
+  font-size: 9px;
+
+  text-align: center;
+}
+
+.cvmfs-active-modules-content {
+  padding: 5px 9px 8px;
+
+  border-top: 1px solid var(--jp-border-color2);
+}
+
+.cvmfs-active-module {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 7px 2px;
+
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.cvmfs-active-module:last-child {
+  border-bottom: none;
+}
+
+.cvmfs-active-dot {
+  width: 8px;
+  height: 8px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: var(--jp-success-color1);
+}
+
+.cvmfs-active-module-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.cvmfs-active-module-info strong {
+  font-size: 10px;
+
+  overflow-wrap: anywhere;
+}
+
+.cvmfs-active-module-info code {
+  font-family: var(--jp-code-font-family);
+
+  font-size: 8px;
+
+  color: var(--jp-ui-font-color2);
+
+  overflow-wrap: anywhere;
+}
+
+.cvmfs-no-active-modules {
+  display: block;
+
+  padding: 5px 2px;
+
+  color: var(--jp-ui-font-color2);
+
+  font-size: 10px;
+}
+
+.cvmfs-active-module-actions {
+  display: flex;
+
+  gap: 6px;
+
+  margin-top: 6px;
+}
+
+.cvmfs-active-terminal-button,
+.cvmfs-active-deactivate-button {
+  min-height: 24px;
+
+  padding: 3px 8px;
+
+  border-radius: 4px;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.cvmfs-active-terminal-button {
+  border: 1px solid var(--jp-brand-color1);
+
+  background: var(--jp-layout-color1);
+
+  color: var(--jp-brand-color1);
+}
+
+.cvmfs-active-terminal-button:hover:not(:disabled) {
+  background: var(--jp-layout-color3);
+}
+
+.cvmfs-active-deactivate-button {
+  border: 1px solid var(--jp-error-color1);
+
+  background: var(--jp-error-color1);
+
+  color: white;
+}
+
+.cvmfs-active-deactivate-button:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.cvmfs-active-terminal-button:disabled,
+.cvmfs-active-deactivate-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+/* =========================================================
+   LCG SOFTWARE
+   ========================================================= */
+
+.cvmfs-lcg-section {
+  width: 100%;
+
+  margin-bottom: 12px;
+
+  padding: 9px;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 6px;
+
+  background: var(--jp-layout-color2);
+}
+
+.cvmfs-lcg-header {
+  margin-bottom: 8px;
+
+  font-size: 12px;
+}/* =========================================================
    CVMFS SOFTWARE EXPLORER
    ========================================================= */
 

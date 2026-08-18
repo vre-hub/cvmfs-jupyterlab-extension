@@ -11,6 +11,7 @@ import { requestAPI } from '../request';
 import { PlatformSelector } from './PlatformSelector';
 import { SearchBar } from './SearchBar';
 import { RepositoryCard } from './RepositoryCard';
+import { ActiveModules } from './ActiveModules';
 
 interface Version {
   versionName: string;
@@ -74,6 +75,20 @@ export function SoftwarePanel({
     setExpandedRepository
   ] = React.useState<string | null>(null);
 
+  /*
+   * Increment whenever the active kernel state
+   * changes. ActiveModules and VersionCards use
+   * this to refresh their state immediately.
+   */
+  const [kernelRefresh, setKernelRefresh] =
+    React.useState(0);
+
+  const handleKernelChange = () => {
+    setKernelRefresh(
+      value => value + 1
+    );
+  };
+
   const changePlatform = async (
     newPlatform: string
   ) => {
@@ -97,12 +112,16 @@ export function SoftwarePanel({
     setExpandedRepository(null);
   };
 
+  const lcgRepository =
+    repositories.find(
+      repository =>
+        repository.name === 'LCG Releases'
+    );
+
   return (
     <div className="cvmfs-container">
 
-      {/* =================================================
-          HEADER
-          ================================================= */}
+      {/* HEADER */}
 
       <div className="cvmfs-header">
 
@@ -118,95 +137,7 @@ export function SoftwarePanel({
       </div>
 
 
-      {/* =================================================
-          PLATFORM INFORMATION
-          ================================================= */}
-
-      <div className="cvmfs-platform-card">
-
-        <div className="cvmfs-platform-selector-area">
-
-          <PlatformSelector
-            platforms={
-              platform.compatible
-            }
-            selected={
-              platform.selected
-            }
-            onChange={
-              changePlatform
-            }
-          />
-
-        </div>
-
-
-        <div className="cvmfs-platform-details">
-
-          <div className="cvmfs-platform-detail">
-
-            <strong>
-              Architecture
-            </strong>
-
-            <span>
-              {platform.architecture}
-            </span>
-
-          </div>
-
-
-          <div className="cvmfs-platform-detail">
-
-            <strong>
-              Operating system
-            </strong>
-
-            <span>
-              {platform.os}
-            </span>
-
-          </div>
-
-
-          <div className="cvmfs-platform-detail">
-
-            <strong>
-              Selected stack
-            </strong>
-
-            <code>
-              {platform.selected}
-            </code>
-
-          </div>
-
-        </div>
-
-
-        <div className="cvmfs-platform-explanation">
-
-          <strong>
-            About this platform
-          </strong>
-
-          <span>
-            This software stack is selected
-            based on the detected system
-            architecture and operating system.
-            It provides software built for
-            the compatible environment shown
-            above.
-          </span>
-
-        </div>
-
-      </div>
-
-
-      {/* =================================================
-          SEARCH
-          ================================================= */}
+      {/* SEARCH */}
 
       <SearchBar
         query={query}
@@ -214,14 +145,95 @@ export function SoftwarePanel({
       />
 
 
-      {/* =================================================
-          SOFTWARE HIERARCHY
-          ================================================= */}
+      {/* ACTIVE MODULES */}
+
+      <ActiveModules
+        serverSettings={serverSettings}
+        kernelSpecManager={kernelSpecManager}
+        app={app}
+        refresh={kernelRefresh}
+        onKernelChange={handleKernelChange}
+      />
+
+
+      {/* LCG SOFTWARE */}
+
+      {lcgRepository && (
+        <div className="cvmfs-lcg-section">
+
+          <div className="cvmfs-lcg-header">
+            <strong>
+              LCG Software
+            </strong>
+          </div>
+
+
+          {/* PLATFORM SELECTOR */}
+
+          <div className="cvmfs-platform-details">
+
+            <PlatformSelector
+              platforms={
+                platform.compatible
+              }
+              selected={
+                platform.selected
+              }
+              onChange={
+                changePlatform
+              }
+            />
+
+          </div>
+
+
+          {/* LCG RELEASES */}
+
+          <RepositoryCard
+            repository={lcgRepository}
+            query={query}
+            expanded={
+              expandedRepository ===
+              lcgRepository.name
+            }
+            onToggle={() =>
+              setExpandedRepository(
+                expandedRepository ===
+                  lcgRepository.name
+                  ? null
+                  : lcgRepository.name
+              )
+            }
+            serverSettings={
+              serverSettings
+            }
+            kernelSpecManager={
+              kernelSpecManager
+            }
+            app={app}
+            onKernelChange={
+              handleKernelChange
+            }
+            kernelRefresh={
+              kernelRefresh
+            }
+          />
+
+        </div>
+      )}
+
+
+      {/* OTHER SOURCES */}
 
       <div className="cvmfs-repository-list">
 
-        {repositories.map(
-          repository => (
+        {repositories
+          .filter(
+            repository =>
+              repository.name !==
+              'LCG Releases'
+          )
+          .map(repository => (
             <RepositoryCard
               key={repository.name}
               repository={repository}
@@ -245,9 +257,14 @@ export function SoftwarePanel({
                 kernelSpecManager
               }
               app={app}
+              onKernelChange={
+                handleKernelChange
+              }
+              kernelRefresh={
+                kernelRefresh
+              }
             />
-          )
-        )}
+          ))}
 
       </div>
 

@@ -26,6 +26,8 @@ interface Props {
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
   app: JupyterFrontEnd;
+  onKernelChange: () => void;
+  kernelRefresh: number;
 }
 
 export function PackageCard({
@@ -34,7 +36,9 @@ export function PackageCard({
   onToggle,
   serverSettings,
   kernelSpecManager,
-  app
+  app,
+  onKernelChange,
+  kernelRefresh
 }: Props) {
   const [
     expandedVersion,
@@ -56,6 +60,7 @@ export function PackageCard({
         onClick={onToggle}
         aria-expanded={expanded}
       >
+
         <span className="cvmfs-expand-icon">
           {expanded ? '▼' : '▶'}
         </span>
@@ -70,6 +75,7 @@ export function PackageCard({
             ? 'version'
             : 'versions'}
         </span>
+
       </button>
 
       {expanded && (
@@ -106,6 +112,12 @@ export function PackageCard({
                   kernelSpecManager
                 }
                 app={app}
+                onKernelChange={
+                  onKernelChange
+                }
+                kernelRefresh={
+                  kernelRefresh
+                }
               />
             )
           )}

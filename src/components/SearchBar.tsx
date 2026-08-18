@@ -10,17 +10,30 @@ export function SearchBar({
   onChange
 }: Props) {
   return (
-    <div className="search-bar">
-      <label>
-        <b>Search</b>
+    <div className="cvmfs-search">
+
+      <label
+        htmlFor="cvmfs-search-input"
+        className="cvmfs-control-label"
+      >
+        Search
       </label>
 
-      <input
-        type="text"
-        placeholder="Search packages..."
-        value={query}
-        onChange={e => onChange(e.target.value)}
-      />
+      <div className="cvmfs-search-wrapper">
+
+        <input
+          id="cvmfs-search-input"
+          type="text"
+          className="cvmfs-search-input"
+          placeholder="Search packages..."
+          value={query}
+          onChange={e =>
+            onChange(e.target.value)
+          }
+        />
+
+      </div>
+
     </div>
   );
 }

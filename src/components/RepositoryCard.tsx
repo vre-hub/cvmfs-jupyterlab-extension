@@ -3,14 +3,14 @@ import * as React from 'react';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import {
-  PackageCard,
-  Package
-} from './PackageCard';
-
-import {
   ServerConnection,
   KernelSpec
 } from '@jupyterlab/services';
+
+import {
+  PackageCard,
+  Package
+} from './PackageCard';
 
 interface Repository {
   name: string;
@@ -25,6 +25,8 @@ interface Props {
   serverSettings: ServerConnection.ISettings;
   kernelSpecManager: KernelSpec.IManager;
   app: JupyterFrontEnd;
+  onKernelChange: () => void;
+  kernelRefresh: number;
 }
 
 export function RepositoryCard({
@@ -34,26 +36,21 @@ export function RepositoryCard({
   onToggle,
   serverSettings,
   kernelSpecManager,
-  app
+  app,
+  onKernelChange,
+  kernelRefresh
 }: Props) {
   const [
     expandedPackage,
     setExpandedPackage
   ] = React.useState<string | null>(null);
 
-  /*
-   * Collapse any open package when
-   * the repository itself is collapsed.
-   */
   React.useEffect(() => {
     if (!expanded) {
       setExpandedPackage(null);
     }
   }, [expanded]);
 
-  /*
-   * Filter packages using the search query.
-   */
   const filteredPackages =
     repository.packages.filter(pkg => {
       const q =
@@ -93,10 +90,6 @@ export function RepositoryCard({
       );
     });
 
-  /*
-   * Hide repositories with no matching
-   * packages.
-   */
   if (
     filteredPackages.length === 0
   ) {
@@ -109,10 +102,6 @@ export function RepositoryCard({
   return (
     <div className="cvmfs-repository">
 
-      {/* =================================================
-          STICKY REPOSITORY HEADER
-          ================================================= */}
-
       <div className="cvmfs-repository-sticky">
 
         <button
@@ -121,6 +110,7 @@ export function RepositoryCard({
           onClick={onToggle}
           aria-expanded={expanded}
         >
+
           <span className="cvmfs-expand-icon">
             {expanded ? '▼' : '▶'}
           </span>
@@ -128,21 +118,13 @@ export function RepositoryCard({
           <span className="cvmfs-repository-name">
             {repository.name}
           </span>
+
         </button>
 
       </div>
 
-
-      {/* =================================================
-          EXPANDED REPOSITORY
-          ================================================= */}
-
       {expanded && (
         <div className="cvmfs-repository-content">
-
-          {/* ---------------------------------------------
-              Package count
-              --------------------------------------------- */}
 
           <div className="cvmfs-repository-summary">
             {packageCount}{' '}
@@ -150,11 +132,6 @@ export function RepositoryCard({
               ? 'package'
               : 'packages'}
           </div>
-
-
-          {/* ---------------------------------------------
-              Packages
-              --------------------------------------------- */}
 
           <div className="cvmfs-package-list">
 
@@ -181,6 +158,12 @@ export function RepositoryCard({
                   kernelSpecManager
                 }
                 app={app}
+                onKernelChange={
+                  onKernelChange
+                }
+                kernelRefresh={
+                  kernelRefresh
+                }
               />
             ))}
 
