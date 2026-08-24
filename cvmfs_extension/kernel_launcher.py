@@ -1,13 +1,20 @@
 import json
 import re
-import subprocess
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 from .config import LMOD_INIT, configured_paths
 
 
-KERNELS_DIR = Path.home() / ".local" / "share" / "jupyter" / "kernels"
+KERNELS_DIR = (
+    Path.home()
+    / ".local"
+    / "share"
+    / "jupyter"
+    / "kernels"
+)
 
 
 def _kernel_name(
@@ -23,16 +30,19 @@ def _kernel_name(
         "-",
         platform,
     )
+
     parts.append(platform_part.lower())
 
     for module in modules:
-        # LCG/107 -> lcg-107
+        # Example: LCG/107 -> lcg-107
         part = module.replace("/", "-")
+
         part = re.sub(
             r"[^a-zA-Z0-9._-]",
             "-",
             part,
         )
+
         parts.append(part.lower())
 
     return "cvmfs-" + "-".join(parts)
@@ -43,13 +53,15 @@ def _create_launcher(
     modules: list[str],
     platform: str,
 ) -> None:
-    """Create the launcher.sh used to start the kernel."""
+    """Create the launcher used to start the Jupyter kernel."""
 
     paths = configured_paths(platform)
 
-    # For now, the LCG module tree is the platform-specific
-    # module tree that we explicitly add with `module use`.
+    # LCG module tree for the selected platform.
     lcg_path = paths["LCG Releases"]
+
+    # EESSI module tree.
+    eessi_path = paths.get("EESSI")
 
     lines = [
         "#!/bin/bash",
@@ -59,22 +71,51 @@ def _create_launcher(
         "",
         "module purge",
         "",
-        f"module use {lcg_path}",
-        "",
     ]
 
-    for module in modules:
-        lines.append(f"module load {module}")
-
+    # Make the LCG module tree available.
     lines.extend(
         [
-            "",
-            'exec python -m ipykernel_launcher "$@"',
+            f"module use {lcg_path}",
             "",
         ]
     )
 
-    launcher_path.write_text("\n".join(lines))
+    # If configured, also make the EESSI module tree available.
+    if eessi_path:
+        lines.extend(
+            [
+                f"module use {eessi_path}",
+                "",
+            ]
+        )
+
+    # Load all requested modules.
+    for module in modules:
+        lines.append(
+            f"module load {module}"
+        )
+
+    lines.extend(
+        [
+            "",
+            # IMPORTANT:
+            # Do not use `python` here.
+            #
+            # After loading an EESSI module, `python` may point to
+            # EESSI's Python, which may not contain ipykernel.
+            #
+            # sys.executable is the Python running the Jupyter
+            # server/extension, i.e. the project's venv Python.
+            f'exec {sys.executable} -m ipykernel_launcher "$@"',
+            "",
+        ]
+    )
+
+    launcher_path.write_text(
+        "\n".join(lines)
+    )
+
     launcher_path.chmod(0o755)
 
 
@@ -96,7 +137,11 @@ def _create_kernel_json(
     }
 
     kernel_path.write_text(
-        json.dumps(kernel_json, indent=2) + "\n"
+        json.dumps(
+            kernel_json,
+            indent=2,
+        )
+        + "\n"
     )
 
 
@@ -115,10 +160,16 @@ def _create_metadata(
         "display_name": display_name,
     }
 
-    metadata_path = kernel_path / "metadata.json"
+    metadata_path = (
+        kernel_path / "metadata.json"
+    )
 
     metadata_path.write_text(
-        json.dumps(metadata, indent=2) + "\n"
+        json.dumps(
+            metadata,
+            indent=2,
+        )
+        + "\n"
     )
 
 
@@ -135,27 +186,36 @@ def create_kernel(
     """
 
     if not modules:
-        raise ValueError("At least one module is required")
+        raise ValueError(
+            "At least one module is required"
+        )
 
     if not platform:
-        raise ValueError("Platform is required")
+        raise ValueError(
+            "Platform is required"
+        )
 
-    # Include platform so the same module on different platforms
-    # gets a different kernelspec.
     kernel_name = _kernel_name(
         modules,
         platform,
     )
 
-    kernel_dir = KERNELS_DIR / kernel_name
+    kernel_dir = (
+        KERNELS_DIR / kernel_name
+    )
+
     kernel_dir.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    
-    launcher_path = kernel_dir / "launcher.sh"
-    kernel_json_path = kernel_dir / "kernel.json"
+    launcher_path = (
+        kernel_dir / "launcher.sh"
+    )
+
+    kernel_json_path = (
+        kernel_dir / "kernel.json"
+    )
 
     _create_launcher(
         launcher_path,
@@ -178,23 +238,29 @@ def create_kernel(
 
     return kernel_name
 
+
 def _module_available(
     module: str,
     platform: str,
 ) -> bool:
-    """Check whether a module is available in the configured module tree."""
+    """Check whether a module is available."""
 
     paths = configured_paths(platform)
+
     lcg_path = paths["LCG Releases"]
 
     try:
+        command = (
+            f"source {LMOD_INIT} && "
+            f"module use {lcg_path} && "
+            f"module spider {module}"
+        )
+
         result = subprocess.run(
             [
                 "bash",
                 "-lc",
-                f"source {LMOD_INIT} && "
-                f"module use {lcg_path} && "
-                f"module spider {module}",
+                command,
             ],
             capture_output=True,
             text=True,
@@ -215,10 +281,14 @@ def validate_kernels() -> list[dict]:
     if not KERNELS_DIR.exists():
         return results
 
-    for kernel_dir in KERNELS_DIR.glob("cvmfs-*"):
-        metadata_path = kernel_dir / "metadata.json"
+    for kernel_dir in KERNELS_DIR.glob(
+        "cvmfs-*"
+    ):
+        metadata_path = (
+            kernel_dir / "metadata.json"
+        )
 
-        # Only inspect kernels created by our extension.
+        # Only inspect kernels created by this extension.
         if not metadata_path.exists():
             continue
 
@@ -229,7 +299,7 @@ def validate_kernels() -> list[dict]:
 
             modules = metadata.get(
                 "modules",
-                []
+                [],
             )
 
             platform = metadata.get(
@@ -277,29 +347,43 @@ def remove_kernel(
 ) -> None:
     """Remove a CVMFS extension-managed kernelspec."""
 
-    if not kernel_name.startswith("cvmfs-"):
+    if not kernel_name.startswith(
+        "cvmfs-"
+    ):
         raise ValueError(
             "Only CVMFS extension kernels can be removed"
         )
 
-    kernel_dir = KERNELS_DIR / kernel_name
+    kernel_dir = (
+        KERNELS_DIR / kernel_name
+    )
 
     if not kernel_dir.exists():
         raise FileNotFoundError(
             f"Kernel {kernel_name} does not exist"
         )
 
-    metadata_path = kernel_dir / "metadata.json"
+    metadata_path = (
+        kernel_dir / "metadata.json"
+    )
 
     if not metadata_path.exists():
         raise ValueError(
             "Kernel is not managed by the CVMFS extension"
         )
 
-    kernel_dir_resolved = kernel_dir.resolve()
-    kernels_root_resolved = KERNELS_DIR.resolve()
+    kernel_dir_resolved = (
+        kernel_dir.resolve()
+    )
 
-    if kernels_root_resolved not in kernel_dir_resolved.parents:
+    kernels_root_resolved = (
+        KERNELS_DIR.resolve()
+    )
+
+    if (
+        kernels_root_resolved
+        not in kernel_dir_resolved.parents
+    ):
         raise ValueError(
             "Invalid kernel path"
         )
