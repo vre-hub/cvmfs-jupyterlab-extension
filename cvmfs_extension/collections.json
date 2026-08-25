@@ -1,0 +1,11 @@
+{
+  "collections": [
+    {
+      "name": "EESSI Python",
+      "description": "Python environment from EESSI.",
+      "modules": [
+        "Python/3.11.3-GCCcore-12.3.0"
+      ]
+    }
+  ]
+}

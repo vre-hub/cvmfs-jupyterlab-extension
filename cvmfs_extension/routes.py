@@ -4,9 +4,13 @@ import tornado
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 
-from .kernel_launcher import validate_kernels, remove_kernel
 from .catalog import get_catalog
-from .kernel_launcher import create_kernel
+from .collections import get_collections
+from .kernel_launcher import (
+    create_kernel,
+    remove_kernel,
+    validate_kernels,
+)
 from .platform_detector import (
     detect_host,
     available_platforms,
@@ -18,9 +22,12 @@ from .terminal_launcher import (
     terminal_name,
 )
 
+
 class KernelRouteHandler(APIHandler):
+
     @tornado.web.authenticated
     async def delete(self, kernel_name):
+
         try:
             remove_kernel(kernel_name)
 
@@ -34,7 +41,9 @@ class KernelRouteHandler(APIHandler):
             )
 
         except FileNotFoundError as exc:
+
             self.set_status(404)
+
             self.finish(
                 json.dumps(
                     {
@@ -46,7 +55,9 @@ class KernelRouteHandler(APIHandler):
             )
 
         except ValueError as exc:
+
             self.set_status(400)
+
             self.finish(
                 json.dumps(
                     {
@@ -58,7 +69,9 @@ class KernelRouteHandler(APIHandler):
             )
 
         except Exception as exc:
+
             self.set_status(500)
+
             self.finish(
                 json.dumps(
                     {
@@ -69,16 +82,24 @@ class KernelRouteHandler(APIHandler):
                 )
             )
 
+
 class CatalogRouteHandler(APIHandler):
+
     @tornado.web.authenticated
     def get(self):
+
         try:
 
-            platform = self.get_argument("platform", None)
+            platform = self.get_argument(
+                "platform",
+                None,
+            )
 
             catalog = get_catalog(platform)
 
-            self.finish(json.dumps(catalog))
+            self.finish(
+                json.dumps(catalog)
+            )
 
         except Exception as exc:
 
@@ -93,9 +114,43 @@ class CatalogRouteHandler(APIHandler):
             )
 
 
-class PlatformRouteHandler(APIHandler):
+class CollectionsRouteHandler(APIHandler):
+
     @tornado.web.authenticated
     def get(self):
+
+        try:
+
+            collections = get_collections()
+
+            self.finish(
+                json.dumps(
+                    {
+                        "collections": collections
+                    }
+                )
+            )
+
+        except Exception as exc:
+
+            self.set_status(500)
+
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code": "COLLECTIONS_FAILED",
+                        "message": str(exc),
+                    }
+                )
+            )
+
+
+class PlatformRouteHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self):
+
         try:
 
             arch, os_name = detect_host()
@@ -105,9 +160,12 @@ class PlatformRouteHandler(APIHandler):
                     {
                         "architecture": arch,
                         "os": os_name,
-                        "available": available_platforms(),
-                        "compatible": compatible_platforms(),
-                        "selected": select_default_platform(),
+                        "available":
+                            available_platforms(),
+                        "compatible":
+                            compatible_platforms(),
+                        "selected":
+                            select_default_platform(),
                     }
                 )
             )
@@ -126,33 +184,50 @@ class PlatformRouteHandler(APIHandler):
 
 
 class ActivateRouteHandler(APIHandler):
+
     @tornado.web.authenticated
     def post(self):
+
         try:
+
             data = self.get_json_body()
 
             modules = data.get("modules")
             platform = data.get("platform")
-            display_name = data.get("display_name")
+            display_name = data.get(
+                "display_name"
+            )
 
             if not modules:
+
                 self.set_status(400)
+
                 self.finish(
                     json.dumps(
                         {
                             "status": "error",
                             "code": "INVALID_REQUEST",
-                            "message": "At least one module is required",
+                            "message":
+                                "At least one module is required",
                         }
                     )
                 )
+
                 return
 
             if not platform:
-                platform = select_default_platform()
+
+                platform = (
+                    select_default_platform()
+                )
 
             if not display_name:
-                display_name = "Python (" + ", ".join(modules) + ")"
+
+                display_name = (
+                    "Python ("
+                    + ", ".join(modules)
+                    + ")"
+                )
 
             kernel_name = create_kernel(
                 modules=modules,
@@ -164,36 +239,180 @@ class ActivateRouteHandler(APIHandler):
                 json.dumps(
                     {
                         "status": "ok",
-                        "kernel_name": kernel_name,
-                        "display_name": display_name,
+                        "kernel_name":
+                            kernel_name,
+                        "display_name":
+                            display_name,
                     }
                 )
             )
 
         except Exception as exc:
-            print("ACTIVATION FAILED:", repr(exc), flush=True)
+
+            print(
+                "ACTIVATION FAILED:",
+                repr(exc),
+                flush=True,
+            )
 
             self.set_status(500)
+
             self.finish(
                 json.dumps(
                     {
                         "status": "error",
-                        "code": "ACTIVATION_FAILED",
+                        "code":
+                            "ACTIVATION_FAILED",
                         "message": str(exc),
                     }
                 )
             )
 
+
+class KernelsRouteHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def get(self):
+
+        try:
+
+            kernels = validate_kernels()
+
+            self.finish(
+                json.dumps(
+                    {
+                        "kernels": kernels
+                    }
+                )
+            )
+
+        except Exception as exc:
+
+            self.set_status(500)
+
+            self.finish(
+                json.dumps(
+                    {
+                        "error": str(exc)
+                    }
+                )
+            )
+
+
+class TerminalRouteHandler(APIHandler):
+
+    @tornado.web.authenticated
+    def post(self):
+
+        try:
+
+            data = self.get_json_body()
+
+            modules = data.get("modules")
+            platform = data.get("platform")
+
+            if not modules:
+
+                self.set_status(400)
+
+                self.finish(
+                    json.dumps(
+                        {
+                            "status": "error",
+                            "code":
+                                "INVALID_REQUEST",
+                            "message":
+                                "At least one module is required",
+                        }
+                    )
+                )
+
+                return
+
+            if not platform:
+
+                self.set_status(400)
+
+                self.finish(
+                    json.dumps(
+                        {
+                            "status": "error",
+                            "code":
+                                "INVALID_REQUEST",
+                            "message":
+                                "Platform is required",
+                        }
+                    )
+                )
+
+                return
+
+            command = build_terminal_command(
+                modules=modules,
+                platform=platform,
+            )
+
+            name = terminal_name(
+                modules=modules,
+                platform=platform,
+            )
+
+            terminal_manager = (
+                self.settings[
+                    "terminal_manager"
+                ]
+            )
+
+            terminal = terminal_manager.create(
+                name=name,
+                shell_command=command,
+            )
+
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "ok",
+                        "name": terminal["name"],
+                        "modules": modules,
+                        "platform": platform,
+                    }
+                )
+            )
+
+        except Exception as exc:
+
+            self.set_status(500)
+
+            self.finish(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "code":
+                            "TERMINAL_CREATION_FAILED",
+                        "message": str(exc),
+                    }
+                )
+            )
+
+
 def setup_route_handlers(web_app):
 
     host_pattern = ".*$"
 
-    base_url = web_app.settings["base_url"]
+    base_url = web_app.settings[
+        "base_url"
+    ]
 
     catalog_route_pattern = url_path_join(
         base_url,
         "cvmfs-extension",
         "catalog",
+    )
+
+    collections_route_pattern = url_path_join(
+        base_url,
+        "cvmfs-extension",
+        "collections",
     )
 
     platform_route_pattern = url_path_join(
@@ -235,6 +454,11 @@ def setup_route_handlers(web_app):
         ),
 
         (
+            collections_route_pattern,
+            CollectionsRouteHandler,
+        ),
+
+        (
             platform_route_pattern,
             PlatformRouteHandler,
         ),
@@ -253,112 +477,14 @@ def setup_route_handlers(web_app):
             kernel_route_pattern,
             KernelRouteHandler,
         ),
+
         (
             terminal_route_pattern,
             TerminalRouteHandler,
         ),
     ]
 
-    web_app.add_handlers(host_pattern, handlers)
-
-class KernelsRouteHandler(APIHandler):
-    @tornado.web.authenticated
-    def get(self):
-        try:
-            kernels = validate_kernels()
-
-            self.finish(
-                json.dumps(
-                    {
-                        "kernels": kernels
-                    }
-                )
-            )
-
-        except Exception as exc:
-            self.set_status(500)
-
-            self.finish(
-                json.dumps(
-                    {
-                        "error": str(exc)
-                    }
-                )
-            )
-
-class TerminalRouteHandler(APIHandler):
-    @tornado.web.authenticated
-    def post(self):
-        try:
-            data = self.get_json_body()
-
-            modules = data.get("modules")
-            platform = data.get("platform")
-
-            if not modules:
-                self.set_status(400)
-                self.finish(
-                    json.dumps(
-                        {
-                            "status": "error",
-                            "code": "INVALID_REQUEST",
-                            "message": "At least one module is required",
-                        }
-                    )
-                )
-                return
-
-            if not platform:
-                self.set_status(400)
-                self.finish(
-                    json.dumps(
-                        {
-                            "status": "error",
-                            "code": "INVALID_REQUEST",
-                            "message": "Platform is required",
-                        }
-                    )
-                )
-                return
-
-            command = build_terminal_command(
-                modules=modules,
-                platform=platform,
-            )
-
-            name = terminal_name(
-                modules=modules,
-                platform=platform,
-            )
-
-            terminal_manager = (
-                self.settings["terminal_manager"]
-            )
-
-            terminal = terminal_manager.create(
-                name=name,
-                shell_command=command,
-            )
-            
-            self.finish(
-                json.dumps(
-                    {
-                        "status": "ok",
-                        "name": terminal["name"],
-                        "modules": modules,
-                        "platform": platform,
-                    }
-                )
-            )
-
-        except Exception as exc:
-            self.set_status(500)
-            self.finish(
-                json.dumps(
-                    {
-                        "status": "error",
-                        "code": "TERMINAL_CREATION_FAILED",
-                        "message": str(exc),
-                    }
-                )
-            )
+    web_app.add_handlers(
+        host_pattern,
+        handlers,
+    )

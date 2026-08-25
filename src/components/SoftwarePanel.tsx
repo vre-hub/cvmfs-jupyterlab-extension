@@ -46,6 +46,20 @@ interface PlatformInfo {
   selected: string;
 }
 
+interface Collection {
+  name: string;
+  description: string;
+  modules: string[];
+}
+
+interface KernelInfo {
+  kernel_name: string;
+  display_name: string;
+  modules: string[];
+  platform: string;
+  available: boolean;
+}
+
 interface Props {
   initialRepositories: Repository[];
   initialPlatform: PlatformInfo;
@@ -77,11 +91,6 @@ export function SoftwarePanel({
     setExpandedRepository
   ] = React.useState<string | null>(null);
 
-  /*
-   * Increment whenever the active kernel state
-   * changes. ActiveModules and VersionCards use
-   * this to refresh their state immediately.
-   */
   const [kernelRefresh, setKernelRefresh] =
     React.useState(0);
 
@@ -89,6 +98,15 @@ export function SoftwarePanel({
     React.useState<string | null>(
       initialError ?? null
     );
+
+  const [collections, setCollections] =
+    React.useState<Collection[]>([]);
+
+  const [kernels, setKernels] =
+    React.useState<KernelInfo[]>([]);
+
+  const [collectionLoading, setCollectionLoading] =
+    React.useState<string | null>(null);
 
   const handleKernelChange = () => {
     setKernelRefresh(
@@ -113,7 +131,10 @@ export function SoftwarePanel({
     if (
       error instanceof ServerConnection.NetworkError
     ) {
-      return 'Could not connect to the CVMFS backend. Please check that the server is available.';
+      return (
+        'Could not connect to the CVMFS backend. ' +
+        'Please check that the server is available.'
+      );
     }
 
     if (error instanceof Error) {
@@ -124,8 +145,257 @@ export function SoftwarePanel({
   };
 
   /*
-   * Change the selected LCG platform and
-   * reload its catalogue.
+   * Load curated software collections.
+   */
+  React.useEffect(() => {
+    const loadCollections = async () => {
+      try {
+        const response =
+          await requestAPI<{
+            collections: Collection[];
+          }>(
+            'collections',
+            serverSettings
+          );
+
+        setCollections(
+          response.collections
+        );
+
+      } catch (error) {
+        console.error(
+          'Failed to load collections:',
+          error
+        );
+      }
+    };
+
+    loadCollections();
+  }, [serverSettings]);
+
+  /*
+   * Load currently available CVMFS kernels.
+   *
+   * Collections use the same kernel list as
+   * ActiveModules and VersionCard.
+   */
+  const loadKernels = React.useCallback(
+    async () => {
+      try {
+        const response =
+          await requestAPI<{
+            kernels: KernelInfo[];
+          }>(
+            'kernels',
+            serverSettings
+          );
+
+        setKernels(
+          response.kernels.filter(
+            kernel => kernel.available
+          )
+        );
+
+      } catch (error) {
+        console.error(
+          'Failed to load kernels:',
+          error
+        );
+      }
+    },
+    [serverSettings]
+  );
+
+  React.useEffect(() => {
+    loadKernels();
+  }, [
+    loadKernels,
+    kernelRefresh
+  ]);
+
+  /*
+   * Find the kernel corresponding to a collection.
+   *
+   * A collection is considered active only when:
+   *
+   * 1. The platform matches.
+   * 2. The kernel contains exactly the collection
+   *    modules.
+   *
+   * Sorting makes the comparison independent
+   * of module ordering.
+   */
+  const getCollectionKernel = (
+    collection: Collection
+  ): KernelInfo | null => {
+    const collectionModules =
+      [...collection.modules].sort();
+
+    return (
+      kernels.find(kernel => {
+        if (
+          kernel.platform !==
+          platform.selected
+        ) {
+          return false;
+        }
+
+        const kernelModules =
+          [...kernel.modules].sort();
+
+        if (
+          kernelModules.length !==
+          collectionModules.length
+        ) {
+          return false;
+        }
+
+        return kernelModules.every(
+          (module, index) =>
+            module ===
+            collectionModules[index]
+        );
+      }) ?? null
+    );
+  };
+
+  /*
+   * Activate a complete collection.
+   */
+  const handleActivateCollection = async (
+    collection: Collection
+  ) => {
+    if (
+      collectionLoading !== null
+    ) {
+      return;
+    }
+
+    setError(null);
+
+    setCollectionLoading(
+      collection.name
+    );
+
+    try {
+      const data =
+        await requestAPI<{
+          kernel_name: string;
+          display_name: string;
+        }>(
+          'activate',
+          serverSettings,
+          {
+            method: 'POST',
+
+            body: JSON.stringify({
+              modules:
+                collection.modules,
+
+              platform:
+                platform.selected,
+
+              display_name:
+                collection.name
+            }),
+
+            headers: {
+              'Content-Type':
+                'application/json'
+            }
+          }
+        );
+
+      console.log(
+        'Collection activated:',
+        data
+      );
+
+      await kernelSpecManager.refreshSpecs();
+
+      await loadKernels();
+
+      handleKernelChange();
+
+    } catch (error) {
+      console.error(
+        'Failed to activate collection:',
+        error
+      );
+
+      setError(
+        `Collection activation failed: ${getErrorMessage(
+          error,
+          `could not activate ${collection.name}.`
+        )}`
+      );
+
+    } finally {
+      setCollectionLoading(null);
+    }
+  };
+
+  /*
+   * Deactivate the kernel belonging to
+   * a collection.
+   */
+  const handleDeactivateCollection = async (
+    collection: Collection,
+    kernel: KernelInfo
+  ) => {
+    if (
+      collectionLoading !== null
+    ) {
+      return;
+    }
+
+    setError(null);
+
+    setCollectionLoading(
+      collection.name
+    );
+
+    try {
+      await requestAPI(
+        `kernels/${kernel.kernel_name}`,
+        serverSettings,
+        {
+          method: 'DELETE'
+        }
+      );
+
+      console.log(
+        'Collection deactivated:',
+        collection.name
+      );
+
+      await kernelSpecManager.refreshSpecs();
+
+      await loadKernels();
+
+      handleKernelChange();
+
+    } catch (error) {
+      console.error(
+        'Failed to deactivate collection:',
+        error
+      );
+
+      setError(
+        `Collection deactivation failed: ${getErrorMessage(
+          error,
+          `could not deactivate ${collection.name}.`
+        )}`
+      );
+
+    } finally {
+      setCollectionLoading(null);
+    }
+  };
+
+  /*
+   * Change selected platform and reload
+   * its catalogue.
    */
   const changePlatform = async (
     newPlatform: string
@@ -170,7 +440,8 @@ export function SoftwarePanel({
   const lcgRepository =
     repositories.find(
       repository =>
-        repository.name === 'LCG Releases'
+        repository.name ===
+        'LCG Releases'
     );
 
   return (
@@ -200,11 +471,153 @@ export function SoftwarePanel({
       />
 
 
+      {/* COLLECTIONS */}
+
+      {collections.length > 0 && (
+        <div className="cvmfs-collections">
+
+          <div className="cvmfs-collections-header">
+
+            <strong>
+              Collections
+            </strong>
+
+            <span>
+              Curated software environments
+            </span>
+
+          </div>
+
+
+          <div className="cvmfs-collections-list">
+
+            {collections.map(
+              collection => {
+
+                const activeKernel =
+                  getCollectionKernel(
+                    collection
+                  );
+
+                const isActive =
+                  activeKernel !== null;
+
+                const loading =
+                  collectionLoading ===
+                  collection.name;
+
+                return (
+                  <div
+                    key={
+                      collection.name
+                    }
+                    className={
+                      `cvmfs-collection ${
+                        isActive
+                          ? 'cvmfs-collection-active'
+                          : ''
+                      }`
+                    }
+                  >
+
+                    <div className="cvmfs-collection-info">
+
+                      <div className="cvmfs-collection-title">
+
+                        <strong>
+                          {collection.name}
+                        </strong>
+
+                        {isActive && (
+                          <span className="cvmfs-active-badge">
+                            active
+                          </span>
+                        )}
+
+                      </div>
+
+                      <span>
+                        {
+                          collection.description
+                        }
+                      </span>
+
+                      <div className="cvmfs-collection-modules">
+
+                        {collection.modules.map(
+                          module => (
+                            <code
+                              key={module}
+                            >
+                              {module}
+                            </code>
+                          )
+                        )}
+
+                      </div>
+
+                    </div>
+
+
+                    <button
+                      type="button"
+                      className={
+                        isActive
+                          ? 'cvmfs-button cvmfs-button-danger'
+                          : 'cvmfs-button cvmfs-button-primary'
+                      }
+                      disabled={
+                        collectionLoading !==
+                        null
+                      }
+                      onClick={() => {
+
+                        if (
+                          activeKernel
+                        ) {
+                          handleDeactivateCollection(
+                            collection,
+                            activeKernel
+                          );
+                        } else {
+                          handleActivateCollection(
+                            collection
+                          );
+                        }
+
+                      }}
+                    >
+
+                      {loading
+                        ? isActive
+                          ? 'Deactivating...'
+                          : 'Activating...'
+                        : isActive
+                          ? 'Deactivate'
+                          : 'Activate'}
+
+                    </button>
+
+                  </div>
+                );
+              }
+            )}
+
+          </div>
+
+        </div>
+      )}
+
+
       {/* ACTIVE MODULES */}
 
       <ActiveModules
-        serverSettings={serverSettings}
-        kernelSpecManager={kernelSpecManager}
+        serverSettings={
+          serverSettings
+        }
+        kernelSpecManager={
+          kernelSpecManager
+        }
         app={app}
         refresh={kernelRefresh}
         onKernelChange={
@@ -237,9 +650,11 @@ export function SoftwarePanel({
         <div className="cvmfs-lcg-section">
 
           <div className="cvmfs-lcg-header">
+
             <strong>
               LCG Software
             </strong>
+
           </div>
 
 
@@ -265,7 +680,9 @@ export function SoftwarePanel({
           {/* LCG RELEASES */}
 
           <RepositoryCard
-            repository={lcgRepository}
+            repository={
+              lcgRepository
+            }
             query={query}
             expanded={
               expandedRepository ===
@@ -309,9 +726,14 @@ export function SoftwarePanel({
               'LCG Releases'
           )
           .map(repository => (
+
             <RepositoryCard
-              key={repository.name}
-              repository={repository}
+              key={
+                repository.name
+              }
+              repository={
+                repository
+              }
               query={query}
               expanded={
                 expandedRepository ===
@@ -339,6 +761,7 @@ export function SoftwarePanel({
                 kernelRefresh
               }
             />
+
           ))}
 
       </div>
