@@ -1115,7 +1115,9 @@
 /* Collections heading */
 
 .cvmfs-collections-header {
-  margin-bottom: 8px;
+  margin-bottom: 7px;
+  color: var(--jp-ui-font-color1);
+  cursor: help;
 }
 
 .cvmfs-collections-title {
