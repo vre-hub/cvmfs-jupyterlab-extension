@@ -108,6 +108,16 @@ export function SoftwarePanel({
   const [collectionLoading, setCollectionLoading] =
     React.useState<string | null>(null);
 
+  /*
+   * Collections are expanded by default.
+   * Clicking the Collections header toggles
+   * the whole section.
+   */
+  const [
+    collectionsExpanded,
+    setCollectionsExpanded
+  ] = React.useState(true);
+
   const handleKernelChange = () => {
     setKernelRefresh(
       value => value + 1
@@ -161,7 +171,6 @@ export function SoftwarePanel({
         setCollections(
           response.collections
         );
-
       } catch (error) {
         console.error(
           'Failed to load collections:',
@@ -195,7 +204,6 @@ export function SoftwarePanel({
             kernel => kernel.available
           )
         );
-
       } catch (error) {
         console.error(
           'Failed to load kernels:',
@@ -316,7 +324,6 @@ export function SoftwarePanel({
       await loadKernels();
 
       handleKernelChange();
-
     } catch (error) {
       console.error(
         'Failed to activate collection:',
@@ -329,7 +336,6 @@ export function SoftwarePanel({
           `could not activate ${collection.name}.`
         )}`
       );
-
     } finally {
       setCollectionLoading(null);
     }
@@ -374,7 +380,6 @@ export function SoftwarePanel({
       await loadKernels();
 
       handleKernelChange();
-
     } catch (error) {
       console.error(
         'Failed to deactivate collection:',
@@ -387,7 +392,6 @@ export function SoftwarePanel({
           `could not deactivate ${collection.name}.`
         )}`
       );
-
     } finally {
       setCollectionLoading(null);
     }
@@ -421,7 +425,6 @@ export function SoftwarePanel({
       );
 
       setExpandedRepository(null);
-
     } catch (error) {
       console.error(
         'Failed to switch platform:',
@@ -447,7 +450,9 @@ export function SoftwarePanel({
   return (
     <div className="cvmfs-container">
 
-      {/* HEADER */}
+      {/* =================================================
+          HEADER
+          ================================================= */}
 
       <div className="cvmfs-header">
 
@@ -463,7 +468,9 @@ export function SoftwarePanel({
       </div>
 
 
-      {/* SEARCH */}
+      {/* =================================================
+          SEARCH
+          ================================================= */}
 
       <SearchBar
         query={query}
@@ -471,145 +478,166 @@ export function SoftwarePanel({
       />
 
 
-      {/* COLLECTIONS */}
+      {/* =================================================
+          COLLECTIONS
+          ================================================= */}
 
       {collections.length > 0 && (
         <div className="cvmfs-collections">
 
-          <div className="cvmfs-collections-header">
+          <button
+            type="button"
+            className="cvmfs-collections-header"
+            onClick={() =>
+              setCollectionsExpanded(
+                value => !value
+              )
+            }
+            aria-expanded={
+              collectionsExpanded
+            }
+          >
+
+            <span className="cvmfs-expand-icon">
+              {collectionsExpanded
+                ? '▼'
+                : '▶'}
+            </span>
 
             <strong>
               Collections
             </strong>
 
-            <span>
-              Curated software environments
-            </span>
-
-          </div>
+          </button>
 
 
-          <div className="cvmfs-collections-list">
+          {/* Collection cards */}
 
-            {collections.map(
-              collection => {
+          {collectionsExpanded && (
+            <div className="cvmfs-collections-list">
 
-                const activeKernel =
-                  getCollectionKernel(
-                    collection
-                  );
+              {collections.map(
+                collection => {
 
-                const isActive =
-                  activeKernel !== null;
+                  const activeKernel =
+                    getCollectionKernel(
+                      collection
+                    );
 
-                const loading =
-                  collectionLoading ===
-                  collection.name;
+                  const isActive =
+                    activeKernel !== null;
 
-                return (
-                  <div
-                    key={
-                      collection.name
-                    }
-                    className={
-                      `cvmfs-collection ${
-                        isActive
-                          ? 'cvmfs-collection-active'
-                          : ''
-                      }`
-                    }
-                  >
+                  const loading =
+                    collectionLoading ===
+                    collection.name;
 
-                    <div className="cvmfs-collection-info">
-
-                      <div className="cvmfs-collection-title">
-
-                        <strong>
-                          {collection.name}
-                        </strong>
-
-                        {isActive && (
-                          <span className="cvmfs-active-badge">
-                            active
-                          </span>
-                        )}
-
-                      </div>
-
-                      <span>
-                        {
-                          collection.description
-                        }
-                      </span>
-
-                      <div className="cvmfs-collection-modules">
-
-                        {collection.modules.map(
-                          module => (
-                            <code
-                              key={module}
-                            >
-                              {module}
-                            </code>
-                          )
-                        )}
-
-                      </div>
-
-                    </div>
-
-
-                    <button
-                      type="button"
+                  return (
+                    <div
+                      key={
+                        collection.name
+                      }
                       className={
-                        isActive
-                          ? 'cvmfs-button cvmfs-button-danger'
-                          : 'cvmfs-button cvmfs-button-primary'
+                        `cvmfs-collection ${
+                          isActive
+                            ? 'cvmfs-collection-active'
+                            : ''
+                        }`
                       }
-                      disabled={
-                        collectionLoading !==
-                        null
-                      }
-                      onClick={() => {
-
-                        if (
-                          activeKernel
-                        ) {
-                          handleDeactivateCollection(
-                            collection,
-                            activeKernel
-                          );
-                        } else {
-                          handleActivateCollection(
-                            collection
-                          );
-                        }
-
-                      }}
                     >
 
-                      {loading
-                        ? isActive
-                          ? 'Deactivating...'
-                          : 'Activating...'
-                        : isActive
-                          ? 'Deactivate'
-                          : 'Activate'}
+                      <div className="cvmfs-collection-info">
 
-                    </button>
+                        <div className="cvmfs-collection-title">
 
-                  </div>
-                );
-              }
-            )}
+                          <strong>
+                            {collection.name}
+                          </strong>
 
-          </div>
+                          {isActive && (
+                            <span className="cvmfs-active-badge">
+                              active
+                            </span>
+                          )}
+
+                        </div>
+
+                        <span>
+                          {
+                            collection.description
+                          }
+                        </span>
+
+                        <div className="cvmfs-collection-modules">
+
+                          {collection.modules.map(
+                            module => (
+                              <code
+                                key={module}
+                              >
+                                {module}
+                              </code>
+                            )
+                          )}
+
+                        </div>
+
+                      </div>
+
+
+                      <button
+                        type="button"
+                        className={
+                          isActive
+                            ? 'cvmfs-button cvmfs-button-danger'
+                            : 'cvmfs-button cvmfs-button-primary'
+                        }
+                        disabled={
+                          collectionLoading !==
+                          null
+                        }
+                        onClick={() => {
+
+                          if (
+                            activeKernel
+                          ) {
+                            handleDeactivateCollection(
+                              collection,
+                              activeKernel
+                            );
+                          } else {
+                            handleActivateCollection(
+                              collection
+                            );
+                          }
+
+                        }}
+                      >
+
+                        {loading
+                          ? isActive
+                            ? 'Deactivating...'
+                            : 'Activating...'
+                          : isActive
+                            ? 'Deactivate'
+                            : 'Activate'}
+
+                      </button>
+
+                    </div>
+                  );
+                }
+              )}
+
+            </div>
+          )}
 
         </div>
       )}
 
 
-      {/* ACTIVE MODULES */}
+      {/* =================================================
+          ACTIVE MODULES
+          ================================================= */}
 
       <ActiveModules
         serverSettings={
@@ -626,13 +654,16 @@ export function SoftwarePanel({
       />
 
 
-      {/* ERROR */}
+      {/* =================================================
+          ERROR
+          ================================================= */}
 
       {error && (
         <div
           className="cvmfs-error"
           role="alert"
         >
+
           <strong>
             Error:
           </strong>{' '}
@@ -640,11 +671,14 @@ export function SoftwarePanel({
           <span>
             {error}
           </span>
+
         </div>
       )}
 
 
-      {/* LCG SOFTWARE */}
+      {/* =================================================
+          LCG SOFTWARE
+          ================================================= */}
 
       {lcgRepository && (
         <div className="cvmfs-lcg-section">
@@ -658,7 +692,9 @@ export function SoftwarePanel({
           </div>
 
 
-          {/* PLATFORM SELECTOR */}
+          {/* ---------------------------------------------
+              PLATFORM SELECTOR
+              --------------------------------------------- */}
 
           <div className="cvmfs-platform-details">
 
@@ -677,7 +713,9 @@ export function SoftwarePanel({
           </div>
 
 
-          {/* LCG RELEASES */}
+          {/* ---------------------------------------------
+              LCG RELEASES
+              --------------------------------------------- */}
 
           <RepositoryCard
             repository={
@@ -715,7 +753,9 @@ export function SoftwarePanel({
       )}
 
 
-      {/* OTHER SOURCES */}
+      {/* =================================================
+          OTHER SOURCES
+          ================================================= */}
 
       <div className="cvmfs-repository-list">
 

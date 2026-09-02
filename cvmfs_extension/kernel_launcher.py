@@ -107,7 +107,7 @@ def _create_launcher(
             #
             # sys.executable is the Python running the Jupyter
             # server/extension, i.e. the project's venv Python.
-            f'exec {sys.executable} -m ipykernel_launcher "$@"',
+            'exec python -m ipykernel_launcher "$@"',
             "",
         ]
     )
